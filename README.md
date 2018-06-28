@@ -1,0 +1,2 @@
+# gurudin.github.io
+blog
