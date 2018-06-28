@@ -1,7 +1,7 @@
 theme: jekyll-theme-architect
 title: Gurudin | 古鲁丁
 SEOTitle: Gurudin | 古鲁丁
-header-img: img/post-bg-desk.jpg
+header-img: img/home-bg-banner.jpg
 email: hc.gaoxiang@gmail.com
 description: "Every failure is leading towards success."
 keyword: "Gurudin, 古鲁丁, php" 
@@ -10,4 +10,10 @@ url: "https://gurudin.github.io"
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "Goals determine what you going to be!"
-sidebar-avatar: /img/about-BY-gentle.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/about-by-gurudin.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+
+# Build settings
+permalink: pretty
+paginate: 10
+exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
+anchorjs: true                          # if you want to customize anchor. check out line:181 of `post.html`
