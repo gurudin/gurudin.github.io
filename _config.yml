@@ -6,6 +6,7 @@ email: hc.gaoxiang@gmail.com
 description: "Every failure is leading towards success."
 keyword: "Gurudin, 古鲁丁, php" 
 url: "https://gurudin.github.io"
+github_repo: "https://github.com/gurudin/gurudin.github.io" # you code repository
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
