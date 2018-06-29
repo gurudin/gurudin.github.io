@@ -16,7 +16,7 @@ tags:
 ``` mkdir -p packages/gurudin/rms ```
 ![avatar](/img/2018-06-29/1.png)
 1. packages 扩展包存放目录
-2. gurudin 坐着名称目录，一般是github用户名
+2. gurudin 作者名称目录，一般是github用户名
 3. rms 扩展包具体名称
 
 #### 初始化 composer 配置,在 rms 目录下运行
