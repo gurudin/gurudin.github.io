@@ -60,6 +60,18 @@ Route::get('rms', 'Gurudin\Rms\Controller\RmsController@index');
 src 目录下创建 views文件夹，创建文件rms.blade.php 
 内容随便写的什么先。
 
+#### 修改 RmsServicProvider 文件
+```
+public function boot()
+{
+    /** 添加路由地址 */
+    $this->loadRoutesFrom(__DIR__ . '/routes.php');
+
+    /** 添加视图位置 */
+    $this->loadViewsFrom(__DIR__.'/views', 'rms');
+}
+```
+
 #### 添加 providers 到 config/app.php 的providers数组里面。
 ``` Gurudin\Rms\RmsServiceProvider::class, ```
 
