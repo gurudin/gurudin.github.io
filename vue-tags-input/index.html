@@ -6,36 +6,159 @@
     <title>VueJs for tags input</title>
     <link href="../public/css/bootstrap.min.css" rel="stylesheet">
     <link href="../public/css/vue-tags-input/vue-tags-input.css" rel="stylesheet">
+    <link href="../public/css/prism.css" rel="stylesheet">
+    <style>
+    kbd {
+      display: block;
+      padding: 10px 10px;
+    }
+    pre.code {
+      background-color: #f5f2f0;
+      margin: 5px 0;
+      padding: 10px;
+    }
+    </style>
   </head>
 
   <body>
-    <div class="container-fluid" id="main">
-      <h2 style="margin-top: 30px;">Tags input demo</h2>
+    <div class="container-fluid" id="main" style="margin-bottom: 100px;">
+      <h2 style="margin-top: 30px; text-align: center;">Tags input demo</h2>
       <hr>
 
-      <div class="card">
-        <div class="card-header">安装</div>
-        <div class="card-body">
-          <h5 class="card-title">yarn add vue2-tags-input</h5>
-          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-          <a href="#" class="btn btn-primary">Go somewhere</a>
-        </div>
+      <h3>安装 (Installation)</h3>
+      <hr>
+      
+      <ul>
+        <li>
+          <p>添加包:</p>
+          <p><kbd>$ yarn add vue2-tags-input</kbd></p>
+          <p><kbd>$ npm install vue2-tags-input</kbd></p>
+        </li>
+
+        <li>
+          <p>引入模块</p>
+          <p>
+            <pre><code class="language-javascript">import tagsInput from "vue-tags-input";
+import "vue-tags-input/dist/vue-tags-input.css";</code></pre>
+          </p>
+        </li>
+
+        <li>
+          <p>文件引入</p>
+          <p>
+            <pre><code class="language-markup">&lt;!-- CDNJS :: Vue (https://cdnjs.com/) --&gt;
+&lt;script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"&gt;&lt;/script&gt;
+
+&lt;!-- Require js --&gt;
+&lt;script src="vue-tags-input.min.js"&gt;&lt;/script&gt;
+
+&lt;!-- Require css --&gt;
+&lt;link href="vue-tags-input.css" rel="stylesheet"&gt;
+</code></pre>
+          </p>
+        </li>
+      </ul>
+
+      <h3>Demo</h3>
+      <hr>
+      <div class="col-12">
+        <p class="h6 text-dark">使用:</p>
+        <pre><code class="language-javascript">
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;tags-input placeholder="Tags input"&gt;&lt;/tags-input&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+&lt;script&gt;
+  Vue.component('tags-input', VueTagsInput.tagsInput);
+&lt;/script&gt;</code></pre>
+
+        <p></p>
+        <p class="h6 text-dark">示例:</p>
+        <tags-input
+          :placeholder="sample.placeholder"
+          :bootstrap="sample.bootstrap"
+          :label-style="sample.labelStyle"
+          :data-value="sample.dataValue"
+          ref="tags"></tags-input>
+
+<pre class="code"><code>&lt;tags-input
+  placeholder="{{sample.placeholder}}"
+  bootstrap="{{sample.bootstrap}}"
+  label-style="{{sample.labelStyle}}"
+  data-value="{{sample.dataValue}}"
+  ref="tags"&gt;&lt;/tags-input&gt;</code></pre>
+
+        <p class="h6 text-dark">参数:</p>
+        <form>
+          <div class="form-group">
+            <label>placeholder</label>
+            <input type="text" class="form-control" v-model="sample.placeholder" maxlength="20" placeholder="占位符">
+            <small class="form-text text-muted">占位符.</small>
+          </div>
+
+          <div class="form-group">
+            <label>bootstrap</label>
+            <select class="form-control" v-model="sample.bootstrap">
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+            <small class="form-text text-muted">bootstrap 版本风格</small>
+          </div>
+
+          <div class="form-group">
+            <label>label-style</label>
+            <select class="form-control" v-model="sample.labelStyle">
+              <option v-for="item in bs4" v-if="sample.bootstrap==4">{{item}}</option>
+              <option v-for="item in bs3" v-if="sample.bootstrap==3">{{item}}</option>
+            </select>
+            <small class="form-text text-muted">tags 样式</small>
+          </div>
+
+          <div class="form-group">
+            <label>data-value <small class="text-muted">(输入 <code>,</code> <code>，</code> <code>Enter</code> 结束输入)</small></label>
+            <tags-input
+              :placeholder="sample.placeholder"
+              bootstrap="4"
+              label-style="light"
+              :data-value="sample.dataValue"
+              :callback="sampleCall"
+              ref="sampleTags"></tags-input>
+            <small class="form-text text-muted">{{sample.dataValue}}</small>
+          </div>
+        </form>
       </div>
-
-      <tags-input></tags-input>
     </div>
-
-    
 
     <script src="../js/jquery.min.js"></script>
     <script src="../public/js/bootstrap.min.js"></script>
     <script src="../public/js/vue.min.js"></script>
     <script src="../public/js/vue-tags-input/vue-tags-input.min.js"></script>
-
+    <script src="../public/js/prism.js"></script>
     <script>
     Vue.component('tags-input', VueTagsInput.tagsInput);
     const vm = new Vue({
       el: '#main',
+      data() {
+        return {
+          sample: {
+            placeholder: 'Tags input',
+            bootstrap: 4,
+            labelStyle: 'info',
+            dataValue: ['Javascript', 'Css', 'Vue']
+          },
+          bs3: ['default', 'primary', 'success', 'info', 'warning', 'danger'],
+          bs4: ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark', 'muted', 'white'],
+        };
+      },
+      methods: {
+        sampleCall(tag, inx) {
+          this.sample.dataValue = this.$refs.sampleTags.getTag();
+          this.$refs.tags.setTag(this.sample.dataValue);
+          return true;
+        }
+      },
       created() {
         console.log('a');
       }
