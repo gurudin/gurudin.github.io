@@ -23,6 +23,7 @@
   <body>
     <div class="container-fluid" id="main" style="margin-bottom: 100px;">
       <h2 style="margin-top: 30px; text-align: center;">Tags input demo</h2>
+      <p style="text-align: center;"><a href="https://github.com/gurudin/vue-tags-input" target="_blank">https://github.com/gurudin/vue-tags-input</a></p>
       <hr>
 
       <h3>安装 (Installation)</h3>
@@ -123,7 +124,7 @@ import "vue-tags-input/dist/vue-tags-input.css";</code></pre>
               bootstrap="4"
               label-style="light"
               :data-value="sample.dataValue"
-              :callback="sampleCall"
+              :on-change="sampleChange"
               ref="sampleTags"></tags-input>
             <small class="form-text text-muted">{{sample.dataValue}}</small>
           </div>
@@ -153,10 +154,9 @@ import "vue-tags-input/dist/vue-tags-input.css";</code></pre>
         };
       },
       methods: {
-        sampleCall(tag, inx) {
+        sampleChange(tags) {
           this.sample.dataValue = this.$refs.sampleTags.getTag();
           this.$refs.tags.setTag(this.sample.dataValue);
-          return true;
         }
       },
       created() {
