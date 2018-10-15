@@ -82,14 +82,34 @@ import "vue-tags-input/dist/vue-tags-input.css";</code></pre>
           :bootstrap="sample.bootstrap"
           :label-style="sample.labelStyle"
           :data-value="sample.dataValue"
+          :on-change="onChange"
+          :callback="callback"
           ref="tags"></tags-input>
 
 <pre class="code"><code>&lt;tags-input
   placeholder="{{sample.placeholder}}"
   bootstrap="{{sample.bootstrap}}"
   label-style="{{sample.labelStyle}}"
+  :on-change="onChange"
+  :callback="callback"
   data-value="{{sample.dataValue}}"
   ref="tags"&gt;&lt;/tags-input&gt;</code></pre>
+
+        <p class="h6 text-dark">回调:</p>
+<pre class="code"><code>/* 改变回调方法 */
+<code class="text-danger">function onChange(value)</code>
+<code>Result</code>
+{{funcData.changeData}}
+</code></pre>
+
+<pre class="code"><code>/* 操作回调方法 */
+<code class="text-danger">function callback(data, index){
+  return true|false;
+}</code>
+<code>Result</code>
+index: {{funcData.callInx}}
+data:{{funcData.callData}}
+</code></pre>
 
         <p class="h6 text-dark">参数:</p>
         <form>
@@ -129,8 +149,26 @@ import "vue-tags-input/dist/vue-tags-input.css";</code></pre>
             <small class="form-text text-muted">{{sample.dataValue}}</small>
           </div>
         </form>
+
+        <p class="h6 text-dark">方法:</p>
+        <div class="form-group">
+          <label><code>this.$refs.tags.getTag()</code></label>
+          <button class="btn btn-info" @click="getTag">@getTag()</button>
+          <small class="form-text text-muted"><pre class="code"><code>{{funcData.tags}}</code></pre></small>
+        </div>
+
+        <div class="form-group">
+          <label><code>this.$refs.tags.setTag()</code></label>
+          <button class="btn btn-info" @click="setTag">@setTag()</button>
+        </div>
+
+        <div class="form-group">
+          <label><code>this.$refs.tags.clearTag()</code></label>
+          <button class="btn btn-info" @click="clearTag">@clearTag()</button>
+        </div>
       </div>
     </div>
+    
 
     <script src="../js/jquery.min.js"></script>
     <script src="../public/js/bootstrap.min.js"></script>
@@ -151,12 +189,41 @@ import "vue-tags-input/dist/vue-tags-input.css";</code></pre>
           },
           bs3: ['default', 'primary', 'success', 'info', 'warning', 'danger'],
           bs4: ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark', 'muted', 'white'],
+          funcData: {
+            tags: [],
+            changeData: [],
+            callData: [],
+            callInx: ''
+          }
         };
       },
       methods: {
+        onChange(value) {
+          this.funcData.changeData = value;
+        },
+        callback(data, inx) {
+          this.funcData.callData = data;
+          this.funcData.callInx = inx;
+
+          return true;
+        },
         sampleChange(tags) {
           this.sample.dataValue = this.$refs.sampleTags.getTag();
           this.$refs.tags.setTag(this.sample.dataValue);
+        },
+        getTag() {
+          this.funcData.tags = this.$refs.tags.getTag();
+        },
+        setTag() {
+          var tags = ['JAVA', 'PHP', 'GO'];
+          this.$refs.tags.setTag(tags);
+          this.$refs.sampleTags.setTag(tags);
+          this.sampleChange();
+        },
+        clearTag() {
+          this.$refs.tags.clearTag();
+          this.$refs.sampleTags.clearTag();
+          this.sampleChange();
         }
       },
       created() {
