@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>VueJs for toggle button</title>
+    <link href="../public/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../public/css/prism.css" rel="stylesheet">
+    <style>
+    kbd {
+      display: block;
+      padding: 10px 10px;
+    }
+    pre.code {
+      background-color: #f5f2f0;
+      margin: 5px 0;
+      padding: 10px;
+    }
+    </style>
+  </head>
+
+  <body>
+  <div id="main">
+    <toggle-button
+      mode="checkbox"
+      v-model="value"
+      :options='[]'></toggle-button>
+  </div>
+
+  <script src="../js/jquery.min.js"></script>
+  <script src="../public/js/bootstrap.min.js"></script>
+  <script src="../public/js/vue.min.js"></script>
+  <script src="../public/js/prism.js"></script>
+  <script src="../public/js/vue-toggle-button.min.js"></script>
+  <script>
+  Vue.component('toggle-button', VueToggleButton.toggleButton)
+  const vm = new Vue({
+    el: '#main',
+    data() {
+      return {
+        value: ''
+      };
+    }
+  });
+  </script>
+  </body>
+</html>
