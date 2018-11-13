@@ -16,22 +16,107 @@
       margin: 5px 0;
       padding: 10px;
     }
+    .col-left,.col-right {
+      height: 100%;
+      position: absolute;
+      background: #fff;
+    }
+    .col-left {
+      border-right: 1px solid rgba(0,0,0,.07);
+      width: 300px;
+      position: fixed;
+    }
+    .col-right {
+      left: 300px;
+      right: 0;
+    }
+    #book-search-input {
+      background-color: #fafafa;
+      padding: 6px;
+      transition: top .5s ease;
+      border-bottom: 1px solid rgba(0,0,0,.07);
+      border-top: 1px solid rgba(0,0,0,.07);
+      margin-bottom: 10px;
+      margin-top: -1px;
+      font-size: 13px;
+    }
+    #book-search-input input, #book-search-input input:focus, #book-search-input input:hover {
+      width: 100%;
+      background: 0 0;
+      border: 1px solid transparent;
+      box-shadow: none;
+      outline: 0;
+      line-height: 22px;
+      padding: 7px 7px;
+      color: inherit;
+    }
+    ul.summary {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      -webkit-transition: top .5s ease;
+      -moz-transition: top .5s ease;
+      -o-transition: top .5s ease;
+      transition: top .5s ease;
+    }
+    ul.summary li {
+      list-style: none;
+      margin-top: 10px;
+      margin-left: 30px;
+    }
+    ul.summary li a, ul.summary li span {
+      color: #7f8c8d;
+      font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 14px;
+    }
+    ul.summary li.active>a {
+      color: #42b983;
+      font-weight: 600;
+      font-size: 15px;
+    }
     </style>
   </head>
 
   <body>
   <div class="container-fluid" id="main" style="margin-bottom: 100px;">
-    <h2 style="margin-top: 30px; text-align: center;">Toggle button demo
-      <a href="https://www.npmjs.com/package/vue-toggle-button" target="_blank">
-        <img src="https://img.shields.io/npm/v/vue-toggle-button.svg">
-      </a>
-    </h2>
-    <p style="text-align: center;">
-      <a href="https://github.com/gurudin/vue-toggle-button" target="_blank">https://github.com/gurudin/vue-toggle-button</a>
-    </p>
-    <hr>
+    <div class="row">
+      <div class="col-left">
+        <div id="book-search-input" role="search">
+          <input type="text" placeholder="Type to search">
+        </div>
+        
+        <nav role="navigation">
+          <ul class="summary">
+            <li
+              class="chapter"
+              v-for="item in menuData"
+              :class="{'active':item.active}"
+              @click="toPath(item)"><a :href="item.path">{{item.text}}</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="col-right">
+        <h5 style="margin: 10px 0 20px 0; text-align: center;">
+          <a href="https://github.com/gurudin/vue-toggle-button" target="_blank">Toggle button demo</a>
+          <a href="https://www.npmjs.com/package/vue-toggle-button" target="_blank">
+            <img src="https://img.shields.io/npm/v/vue-toggle-button.svg">
+          </a>
+          <div style="position: absolute; right: 0; top: 10px">
+            <iframe src="https://ghbtns.com/github-btn.html?user=gurudin&amp;repo=vue-toggle-button&amp;type=star&amp;count=true" frameborder="0" scrolling="0" width="94px" height="20px"></iframe>
+          </div>
+        </h5>
 
-    <h3>安装 (Installation)</h3>
+        <div class="col-sm-12" id="install" style="height: 500px;">install</div>
+
+        <div class="col-sm-12" id="button" style="height: 500px;">button</div>
+
+        <div class="col-sm-12" id="checkbox" style="height: 500px;">checkbox</div>
+
+        <div class="col-sm-12" id="props" style="height: 500px;">props</div>
+      </div>
+    </div>
+
+    <!--<h3>安装 (Installation)</h3>
     <hr>
 
     <ul>
@@ -59,7 +144,7 @@
 </code></pre>
         </p>
       </li>
-    </ul>
+    </ul>-->
     <!-- <toggle-button
       mode="checkbox"
       v-model="value"
@@ -77,8 +162,27 @@
     el: '#main',
     data() {
       return {
+        menu: [
+          {text: '安装 (Installation)', path: '#install', active: 1},
+          {text: '按钮切换', path: '#button', active: 0},
+          {text: '复选框切换', path: '#checkbox', active: 0},
+          {text: 'Props', path: '#props', active: 0}
+        ],
+        searchKey: '',
         value: ''
       };
+    },
+    computed: {
+      menuData() {
+        return this.menu;
+      }
+    },
+    methods: {
+      toPath(item) {
+        this.menu.forEach(row => {
+          row.active = row.path == item.path ? 1 : 0;
+        });
+      }
     }
   });
   </script>
