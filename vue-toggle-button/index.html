@@ -229,10 +229,158 @@ const vm = new Vue({
                 <pre><code class="language-javascript">&lt;toggle-button disabled>&lt;/toggle-button></code></pre>
               </p>
             </li>
+          </ul>
         </div>
 
         <div class="col-sm-12" id="checkbox">
           <h3 class="text-dark">复选框切换</h3>
+          <ul>
+            <li>
+              <p class="text-secondary">尺寸</p>
+              <p><toggle-button
+                v-model="checkbox.value"
+                mode="checkbox"
+                size="sm"
+                :options='[]'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button mode="checkbox" :options='[]' size="sm">&lt;/toggle-button></code></pre>
+              </p>
+
+              <p><toggle-button
+                v-model="checkbox.value"
+                mode="checkbox"
+                :options='[]'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button mode="checkbox" :options='[]'>&lt;/toggle-button></code></pre>
+              </p>
+            </li>
+
+            <li>
+              <p class="text-secondary">样式设置</p>
+              <p>
+                <toggle-button
+                  v-model="checkbox.value"
+                  mode="checkbox"
+                  :toggle='{checked: "info", unchecked: "dark"}'
+                  :options='[]'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button mode="checkbox" :toggle='{checked: "info", unchecked: "dark"}'>&lt;/toggle-button></code></pre>
+              </p>
+              <p>
+                <toggle-button
+                  v-model="checkbox.value"
+                  mode="checkbox"
+                  :toggle='{checked: "rgb(187, 153, 205)", unchecked: "rgb(191, 203, 217)"}'
+                  :options='[{label: "Offline", value: 0}, {label: "Online", value: 1}]'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button mode="checkbox" :toggle='{checked: "rgb(187, 153, 205)", unchecked: "rgb(191, 203, 217)"}' :options='[{label: "Offline", value: 0}, {label: "Online", value: 1}]'>&lt;/toggle-button></code></pre>
+              </p>
+            </li>
+
+            <li>
+              <p class="text-secondary">是否可用</p>
+              <p>
+                <toggle-button
+                  v-model="checkbox.value"
+                  mode="checkbox"
+                  disabled
+                  :options='[]'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button mode="checkbox" disabled>&lt;/toggle-button></code></pre>
+              </p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="col-sm-12" id="function">
+          <h3 class="text-dark">Function</h3>
+          <ul>
+            <li>
+              <p class="text-secondary">改变前回调方法</p>
+              <p>
+                <toggle-button
+                  v-model="func.value"
+                  mode="checkbox"
+                  size="sm"
+                  :options='func.options'
+                  :before="changeBefore"></toggle-button>
+<pre><code class="language-javascript">  HTML
+  &lt;toggle-button
+    v-model="value"
+    mode="checkbox"
+    size="sm"
+    :options='options'
+    :before="changeBefore">&lt;/toggle-button>
+
+  JS
+  const vm = new Vue({
+    data() {
+      return {
+        value: false,
+        options: [
+          {label: "Active", value: false},
+          {label: "Deactive", value: true}
+        ]
+      };
+    },
+    methods: {
+      /**
+      * 改变前回调
+      *
+      * @param obj.value 改变后值
+      * @param obj.event 当前对象
+      *
+      * @return Boolean true=修改当前值  false=不修改当前值
+      */
+      changeBefore(obj) {
+        var value = obj.value;
+        var event = obj.event;
+        
+        if (confirm('改变后状态是' + value + ', 确认修改？')) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+  });
+</code></pre>
+              </p>
+            </li>
+
+            <li>
+              <p class="text-secondary">改变回调方法</p>
+              <p>
+                <toggle-button
+                  v-model="func.value"
+                  size="sm"
+                  :options='func.options'
+                  @change="change"></toggle-button>
+<pre><code class="language-javascript">  HTML
+  &lt;toggle-button
+    v-model="value"
+    size="sm"
+    :options='options'
+    @change="change">&lt;/toggle-button>
+
+  JS
+  const vm = new Vue({
+    data() {
+      return {
+        value: false,
+        options: [
+          {label: "Deactive", value: false, checked: "warning"},
+          {label: "Active", value: true, checked: "success"}
+        ]
+      };
+    },
+    methods: {
+      change(obj) {
+        var value = obj.value; // 改变后的值
+        var event = obj.event; // 当前操作对象
+        alert(value);
+      }
+    }
+  });
+</code></pre>
+              </p>
+            </li>
+          </ul>
         </div>
 
         <div class="col-sm-12" id="props">
@@ -371,6 +519,7 @@ const vm = new Vue({
           {text: '安装 (Installation)', path: '#install', active: 1},
           {text: '按钮切换', path: '#button', active: 0},
           {text: '复选框切换', path: '#checkbox', active: 0},
+          {text: '事件', path: '#function', active: 0},
           {text: 'Props', path: '#props', active: 0}
         ],
         searchKey: '',
@@ -386,6 +535,16 @@ const vm = new Vue({
             value: 0,
             options: [{label: "Left", value: 0}, {label: "Right", value: 1}]
           }
+        },
+        checkbox: {
+          value: 0,
+        },
+        func: {
+          value: false,
+          options: [
+            {label: "Deactive", value: false, checked: "warning"},
+            {label: "Active", value: true, checked: "success"}
+          ],
         }
       };
     },
@@ -409,6 +568,21 @@ const vm = new Vue({
         });
 
         $('html, body').animate({scrollTop: $(item.path).offset().top}, 500);
+      },
+      change(obj) {
+        var value = obj.value;
+        var event = obj.event;
+        alert(value);
+      },
+      changeBefore(obj) {
+        var value = obj.value;
+        var event = obj.event;
+        
+        if (confirm('改变后状态是' + value + ', 确认修改？')) {
+          return true;
+        } else {
+          return false;
+        }
       }
     }
   });
