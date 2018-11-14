@@ -145,7 +145,7 @@
 &lt;toggle-button
   mode="checkbox"
   v-model="value"
-  :options='[]'&gt;&lt;/toggle-button&gt;
+  :options='options'&gt;&lt;/toggle-button&gt;
 
 # JS
 Vue.component('toggle-button', VueToggleButton.toggleButton)
@@ -167,7 +167,7 @@ const vm = new Vue({
           </ul>
         </div>
 
-        <div class="col-sm-12" id="button" style="height: 500px;">
+        <div class="col-sm-12" id="button">
           <h3 class="text-dark">按钮切换</h3>
           
           <ul>
@@ -194,9 +194,44 @@ const vm = new Vue({
                 <pre><code class="language-javascript">&lt;toggle-button size="lg">&lt;/toggle-button></code></pre>
               </p>
             </li>
+
+            <li>
+              <p class="text-secondary">样式设置</p>
+              <p>
+                <toggle-button
+                  v-model="button.size.value"
+                  :toggle='{checked: "info", unchecked: "dark"}'
+                  :options='button.size.options'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button :toggle='{checked: "info", unchecked: "dark"}'>&lt;/toggle-button></code></pre>
+              </p>
+              <p>
+                <toggle-button
+                  v-model="button.size.value"
+                  :toggle='{checked: "rgb(187, 153, 205)", unchecked: "rgb(191, 203, 217)"}'
+                  :options='button.size.options'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button :toggle='{checked: "rgb(187, 153, 205)", unchecked: "rgb(191, 203, 217)"}'>&lt;/toggle-button></code></pre>
+              </p>
+              <p>
+                <toggle-button
+                  v-model="button.size.value"
+                  :options='[{label: "Offline", value: 0, "checked": "warning"}, {label: "Online", value: 1, "checked": "success"}]'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button :options='[{label: "Offline", value: 0, "checked": "warning"}, {label: "Online", value: 1, "checked": "success"}]'>&lt;/toggle-button></code></pre>
+              </p>
+            </li>
+
+            <li>
+              <p class="text-secondary">是否可用</p>
+              <p>
+                <toggle-button
+                  v-model="button.size.value"
+                  disabled
+                  :options='button.size.options'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button disabled>&lt;/toggle-button></code></pre>
+              </p>
+            </li>
         </div>
 
-        <div class="col-sm-12" id="checkbox" style="height: 500px;">
+        <div class="col-sm-12" id="checkbox">
           <h3 class="text-dark">复选框切换</h3>
         </div>
 
