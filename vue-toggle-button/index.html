@@ -82,7 +82,7 @@
     <div class="row">
       <div class="col-left">
         <div id="book-search-input" role="search">
-          <input type="text" placeholder="Type to search">
+          <input type="text" placeholder="Type to search" v-model="searchKey">
         </div>
         
         <nav role="navigation">
@@ -91,7 +91,7 @@
               class="chapter"
               v-for="item in menuData"
               :class="{'active':item.active}"
-              @click="toPath(item)"><a :href="item.path">{{item.text}}</a></li>
+              @click="toPath(item)"><a href="javascript:;">{{item.text}}</a></li>
           </ul>
         </nav>
       </div>
@@ -106,49 +106,219 @@
           </div>
         </h5>
 
-        <div class="col-sm-12" id="install" style="height: 500px;">install</div>
+        <div class="col-sm-12" id="install">
+          <h3 class="text-dark">安装 (Installation)</h3>
+          <ul>
+            <li>
+              <p class="text-secondary">添加包:</p>
+              <p><kbd>$ yarn add vue-toggle-button</kbd></p>
+              <p><kbd>$ npm install vue-toggle-button</kbd></p>
+            </li>
 
-        <div class="col-sm-12" id="button" style="height: 500px;">button</div>
+            <li>
+              <p class="text-secondary">引入模块</p>
+              <p>
+                <pre><code class="language-javascript">import ToggleButton from "vue-toggle-button";</code></pre>
+              </p>
+            </li>
 
-        <div class="col-sm-12" id="checkbox" style="height: 500px;">checkbox</div>
-
-        <div class="col-sm-12" id="props" style="height: 500px;">props</div>
-      </div>
-    </div>
-
-    <!--<h3>安装 (Installation)</h3>
-    <hr>
-
-    <ul>
-      <li>
-        <p>添加包:</p>
-        <p><kbd>$ yarn add vue-toggle-button</kbd></p>
-        <p><kbd>$ npm install vue-toggle-button</kbd></p>
-      </li>
-
-      <li>
-        <p>引入模块</p>
-        <p>
-          <pre><code class="language-javascript">import ToggleButton from "vue-toggle-button";</code></pre>
-        </p>
-      </li>
-
-      <li>
-        <p>文件引入</p>
-        <p>
-          <pre><code class="language-markup">&lt;!-- CDNJS :: Vue (https://cdnjs.com/) --&gt;
+            <li>
+              <p class="text-secondary">文件引入</p>
+              <p>
+                <pre><code class="language-markup">&lt;!-- CDNJS :: Vue (https://cdnjs.com/) --&gt;
 &lt;script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"&gt;&lt;/script&gt;
 
 &lt;!-- Require js --&gt;
 &lt;script src="//vue-toggle-button.min.js"&gt;&lt;/script&gt;
 </code></pre>
-        </p>
-      </li>
-    </ul>-->
-    <!-- <toggle-button
-      mode="checkbox"
-      v-model="value"
-      :options='[]'></toggle-button> -->
+              </p>
+            </li>
+
+            <li>
+              <p class="text-secondary">示例</p>
+              <toggle-button
+                v-model="demo.value"
+                :options='demo.options'></toggle-button><br>
+                value: {{demo.value}}
+              <p>
+                <pre><code class="language-javascript"># HTML
+&lt;toggle-button
+  mode="checkbox"
+  v-model="value"
+  :options='[]'&gt;&lt;/toggle-button&gt;
+
+# JS
+Vue.component('toggle-button', VueToggleButton.toggleButton)
+const vm = new Vue({
+  el: "#app",
+  data() {
+    return {
+      options: [
+        {label: "Active", value: 'active'},
+        {label: "Deactive", value: 'deactive'}
+      ]
+      value: 'active'
+    };
+  }
+});
+</code></pre>
+              </p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="col-sm-12" id="button" style="height: 500px;">
+          <h3 class="text-dark">按钮切换</h3>
+          
+          <ul>
+            <li>
+              <p class="text-secondary">尺寸</p>
+              <p><toggle-button
+                v-model="button.size.value"
+                size="sm"
+                :options='button.size.options'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button size="sm">&lt;/toggle-button></code></pre>
+              </p>
+
+              <p><toggle-button
+                v-model="button.size.value"
+                size=""
+                :options='button.size.options'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button size="">&lt;/toggle-button></code></pre>
+              </p>
+
+              <p><toggle-button
+                v-model="button.size.value"
+                size="lg"
+                :options='button.size.options'></toggle-button>
+                <pre><code class="language-javascript">&lt;toggle-button size="lg">&lt;/toggle-button></code></pre>
+              </p>
+            </li>
+        </div>
+
+        <div class="col-sm-12" id="checkbox" style="height: 500px;">
+          <h3 class="text-dark">复选框切换</h3>
+        </div>
+
+        <div class="col-sm-12" id="props">
+          <h3 class="text-dark">Props</h3>
+<pre><code class="language-javascript">
+  /**
+  * 模式
+  *
+  * @type {String}
+  * 
+  * @required false
+  *
+  * `group` bootstrap `btn-group`样式
+  * `checkbox` 复选框样式
+  */
+  mode: {
+    type: String,
+    required: false,
+    default: 'group' // group|checkbox
+  },
+  /**
+  * 绑定数据
+  *
+  * @type {mixed}
+  *
+  * @required true
+  */
+  value: {
+    type: null,
+    required: true,
+    default: 0
+  },
+  /**
+  * 选择数据
+  *
+  * @type {Array}
+  * 
+  * @required true
+  *
+  * @example [
+  *     {label: "Left", value: 1, checked: "primary"},
+  *     {label: "Middle", value: 2, checked: "info"},
+  *     {label: "Right", value: 3}
+  * ]
+  * label: 标签描述
+  * value: 标签值
+  * checked: 选中样式
+  */
+  options: {
+    type: Array,
+    required: true
+  },
+  /**
+  * 样式设置
+  * 
+  * @type {Object}
+  * 
+  * @required false
+  * 
+  * @example {checked: "success", unchecked: "secondary"}
+  * checked: 选中样式
+  * unchecked: 未选中样式
+  * 
+  * bootstrap3 default|primary|success|info|warning|danger
+  * bootstrap4 primary|secondary|success|danger|warning|info|light|dark
+  *
+  * 自定义颜色 rgb(187, 153, 205)|red|#000000
+  */
+  toggle: {
+    type: Object,
+    required: false,
+    default: () =>{
+      return { checked: "success", unchecked: "secondary" };
+    } 
+  },
+  /**
+  * 尺寸
+  * 
+  * @type {String}
+  * 
+  * @required false
+  * 
+  * @example ''|sm|lg
+  */
+  size: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  /**
+  * 是否可用
+  * 
+  * @type {Boolean}
+  * 
+  * @required false
+  * 
+  * @example true|false
+  */
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  /**
+  * 改变前回调方法
+  *
+  * @type {Function}
+  *
+  * @required false
+  *
+  * @param value 改变后值
+  * @param event 当前对象
+  */
+  before: {
+    type: Function,
+    required: false,
+  }
+</code></pre>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="../js/jquery.min.js"></script>
@@ -169,12 +339,32 @@
           {text: 'Props', path: '#props', active: 0}
         ],
         searchKey: '',
-        value: ''
+        demo: {
+          options: [
+            {label: "Active", value: 'active'},
+            {label: "Deactive", value: 'deactive'}
+          ],
+          value: 'active',
+        },
+        button: {
+          size: {
+            value: 0,
+            options: [{label: "Left", value: 0}, {label: "Right", value: 1}]
+          }
+        }
       };
     },
     computed: {
       menuData() {
-        return this.menu;
+        var menus = this.menu;
+        var key = this.searchKey;
+        if (key != '') {
+          menus = menus.filter(row =>{
+            return row.text.toLowerCase().indexOf(key.toLowerCase()) > -1;
+          });
+        }
+
+        return menus;
       }
     },
     methods: {
@@ -182,6 +372,8 @@
         this.menu.forEach(row => {
           row.active = row.path == item.path ? 1 : 0;
         });
+
+        $('html, body').animate({scrollTop: $(item.path).offset().top}, 500);
       }
     }
   });
