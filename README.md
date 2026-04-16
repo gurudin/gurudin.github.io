@@ -1,37 +1,34 @@
-## Welcome to GitHub Pages
+# Gurudin — Software Developer
 
-You can use the [editor on GitHub](https://github.com/gurudin/gurudin.github.io/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+Personal website and home of [AnyCode](https://gurudin.github.io/anycoding/), an open-source native mobile terminal for Claude Code, Codex, and any PTY-based coding agent.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## AnyCode
 
-### Markdown
+AnyCode lets you run Claude Code, OpenAI Codex, and any terminal-based coding agent from your phone. It renders the real PTY terminal stream — ANSI colors, progress bars, interactive prompts — not a chat simulator.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### Key Features
 
-```markdown
-Syntax highlighted code block
+- **Real terminal rendering** — what you see on your laptop is exactly what you see on your phone
+- **Multi-agent support** — run Claude Code and Codex side by side with tabbed sessions
+- **Three connection modes** — Cloud Relay (zero setup), Cloudflare Tunnel (self-hosted), or LAN
+- **Camera integration** — snap a whiteboard photo and send it directly as agent context
+- **Smart notifications** — get push alerts when the agent needs your input
+- **Open source** — MIT license, free forever
 
-# Header 1
-## Header 2
-### Header 3
+### Quick Start
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+```bash
+npm i -g any-coding
+any-coding
+# Scan the QR code with the AnyCode app
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+### Links
 
-### Jekyll Themes
+- **Website**: [gurudin.github.io/anycoding](https://gurudin.github.io/anycoding/)
+- **Download**: [GitHub Releases](https://github.com/gurudin/anycoding/releases)
+- **Source Code**: [github.com/gurudin/anycoding](https://github.com/gurudin/anycoding)
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/gurudin/gurudin.github.io/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+## License
 
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+[MIT](LICENSE)
