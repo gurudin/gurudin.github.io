@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; height: 630px;
+    background: #0a0f0d;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    color: white; overflow: hidden; position: relative;
+  }
+  .bg-grid {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, #1a2320 1px, transparent 0);
+    background-size: 40px 40px; opacity: 0.5;
+  }
+  .content { position: relative; z-index: 1; text-align: center; }
+  .logo { width: 80px; height: 80px; border-radius: 16px; margin: 0 auto 24px; }
+  h1 { font-size: 56px; font-weight: 800; letter-spacing: -2px; line-height: 1.1; margin-bottom: 16px; }
+  .gradient { background: linear-gradient(135deg, #34d399, #6ee7b7, #a7f3d0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  p { font-size: 22px; color: #8a9b93; max-width: 700px; margin: 0 auto 28px; }
+  .agents { display: flex; gap: 16px; justify-content: center; }
+  .agent { background: #131a17; border: 1px solid #243029; border-radius: 12px; padding: 8px 20px; font-size: 15px; color: #8a9b93; }
+  .badge { position: absolute; top: 32px; right: 40px; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); color: #34d399; border-radius: 20px; padding: 6px 16px; font-size: 13px; }
+</style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="content">
+    <img src="logo.png" class="logo" alt="AnyCode" />
+    <h1>Run coding agents<br/><span class="gradient">from your phone</span></h1>
+    <p>Native mobile terminal for Claude Code, Codex, and any PTY agent. Open source.</p>
+    <div class="agents">
+      <div class="agent">🟣 Claude Code</div>
+      <div class="agent">🟢 Codex</div>
+      <div class="agent">🔵 Any Agent</div>
+    </div>
+  </div>
+  <div class="badge">MIT · Open Source</div>
+</body>
+</html>

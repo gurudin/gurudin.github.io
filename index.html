@@ -1,42 +1,74 @@
----
-layout: page
-description: "Thinking will not overcome fear but action will."
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gurudin — Developer</title>
+  <meta name="description" content="Software developer. Building AnyCode — run Claude Code from your phone." />
+  <meta name="theme-color" content="#0a0f0d" />
+  <link rel="icon" href="/anycoding/favicon.ico" sizes="32x32" />
+  <link rel="icon" href="/anycoding/logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/anycoding/apple-touch-icon.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#0a0f0d',
+            surface: '#131a17',
+            border: '#243029',
+            accent: '#34d399',
+            muted: '#8a9b93',
+          },
+        },
+      },
+    }
+  </script>
+  <style>body { background: #0a0f0d; }</style>
+</head>
+<body class="text-white font-sans antialiased min-h-screen flex items-center justify-center px-6">
+  <div class="max-w-lg w-full py-20">
+    <div class="flex items-center gap-4 mb-8">
+      <div class="w-16 h-16 rounded-full bg-surface border border-border flex items-center justify-center text-2xl font-bold text-accent">
+        G
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">Gurudin</h1>
+        <p class="text-muted text-sm">Software Developer</p>
+      </div>
+    </div>
 
-{% for post in paginator.posts %}
-<div class="post-preview">
-    <a href="{{ post.url | prepend: site.baseurl }}">
-        <h2 class="post-title">
-            {{ post.title }}
-        </h2>
-        {% if post.subtitle %}
-        <h3 class="post-subtitle">
-            {{ post.subtitle }}
-        </h3>
-        {% endif %}
-        <div class="post-content-preview">
-            {{ post.content | strip_html | truncate:200 }}
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by {% if post.author %}{{ post.author }}{% else %}{{ site.title }}{% endif %} on {{ post.date | date: "%B %-d, %Y" }}
+    <p class="text-muted leading-relaxed mb-8">
+      Building tools for developers. Currently working on
+      <a href="/anycoding" class="text-accent hover:text-white transition-colors font-medium">AnyCode</a>
+      — a native mobile terminal for Claude Code and Codex.
     </p>
-</div>
-<hr>
-{% endfor %}
 
-<!-- Pager -->
-{% if paginator.total_pages > 1 %}
-<ul class="pager">
-    {% if paginator.previous_page %}
-    <li class="previous">
-        <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr; Newer Posts</a>
-    </li>
-    {% endif %}
-    {% if paginator.next_page %}
-    <li class="next">
-        <a href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older Posts &rarr;</a>
-    </li>
-    {% endif %}
-</ul>
-{% endif %}
+    <div class="space-y-3 mb-10">
+      <a href="/anycoding"
+         class="flex items-center justify-between p-4 rounded-xl bg-surface border border-border hover:border-accent/50 transition-colors group">
+        <div class="flex items-center gap-3">
+          <img src="/anycoding/logo.png" alt="AnyCode" class="w-6 h-6 rounded" />
+          <div>
+            <p class="font-medium text-sm">AnyCode</p>
+            <p class="text-xs text-muted">Run Claude Code from your phone</p>
+          </div>
+        </div>
+        <svg class="w-4 h-4 text-muted group-hover:text-accent transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+    </div>
+
+    <div class="flex items-center gap-5 text-muted">
+      <a href="https://github.com/gurudin" target="_blank" class="hover:text-white transition-colors" title="GitHub">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+      <a href="mailto:hc.gaoxiang@gmail.com" class="hover:text-white transition-colors" title="Email">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </a>
+    </div>
+
+    <p class="text-xs text-muted/50 mt-12">&copy; 2026 Gurudin</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AnyCode – 在手机上运行 Claude Code、Codex 等编程 Agent</title>
+  <meta name="description" content="AnyCode 是一款开源原生移动终端，支持 Claude Code、Codex 及任何基于 PTY 的编程 Agent。通过 Cloudflare 隧道自部署或云端中继连接。真正的终端渲染，不是聊天模拟器。MIT 开源协议。" />
+  <meta name="keywords" content="claude code 手机, codex 手机, 编程 agent 手机, 远程终端, claude code remote, 移动终端, 自部署, 开源, cloudflare tunnel, any-coding, anycoding" />
+  <meta name="author" content="Gurudin" />
+  <meta name="theme-color" content="#0a0f0d" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://gurudin.github.io/anycoding/zh/" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="AnyCode – 在手机上运行编程 Agent" />
+  <meta property="og:description" content="一个原生移动终端，支持 Claude Code、Codex 及所有编程 Agent。云端中继或自部署。真正的 PTY 终端，开源，MIT 协议。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://gurudin.github.io/anycoding/zh/" />
+  <meta property="og:image" content="https://gurudin.github.io/anycoding/og-image.png" />
+  <meta property="og:site_name" content="AnyCode" />
+  <meta property="og:locale" content="zh_CN" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AnyCode – 在手机上运行编程 Agent" />
+  <meta name="twitter:description" content="原生移动终端，支持 Claude Code 和 Codex。自部署或云端中继。开源项目。" />
+  <meta name="twitter:image" content="https://gurudin.github.io/anycoding/og-image.png" />
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "AnyCode",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Android",
+    "description": "一款原生移动终端，支持 Claude Code、Codex 及任何基于 PTY 的编程 Agent。支持自部署和云端中继。",
+    "url": "https://gurudin.github.io/anycoding/zh/",
+    "downloadUrl": "https://github.com/gurudin/anycoding/releases",
+    "softwareVersion": "0.1.0",
+    "license": "https://opensource.org/licenses/MIT",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Gurudin",
+      "url": "https://gurudin.github.io"
+    },
+    "keywords": ["claude code", "codex", "移动终端", "编程 agent", "自部署", "开源"]
+  }
+  </script>
+
+  <link rel="icon" href="../favicon.ico" sizes="32x32" />
+  <link rel="icon" href="../logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#0a0f0d',
+            surface: '#131a17',
+            surface2: '#1a2320',
+            border: '#243029',
+            accent: '#34d399',
+            accent2: '#6ee7b7',
+            muted: '#8a9b93',
+            cloud: '#60a5fa',
+            cloud2: '#93c5fd',
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Inter', 'Segoe UI', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { background: #0a0f0d; }
+    .gradient-text {
+      background: linear-gradient(135deg, #34d399 0%, #6ee7b7 50%, #a7f3d0 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .gradient-text-blue {
+      background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 50%, #bfdbfe 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .glow { box-shadow: 0 0 60px rgba(52, 211, 153, 0.08); }
+    .glow-blue { box-shadow: 0 0 60px rgba(96, 165, 250, 0.08); }
+    .terminal-window { background: #0d1210; border: 1px solid #243029; border-radius: 12px; overflow: hidden; }
+    .terminal-dots span { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .feature-card {
+      background: linear-gradient(180deg, #131a17 0%, #0f1513 100%);
+      border: 1px solid #243029; border-radius: 16px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .feature-card:hover { border-color: #34d399; box-shadow: 0 0 40px rgba(52, 211, 153, 0.06); }
+    .code-block { background: #0d1210; border: 1px solid #1e2a25; border-radius: 8px; font-family: 'JetBrains Mono', monospace; }
+    .badge { background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); color: #34d399; border-radius: 9999px; padding: 4px 12px; font-size: 0.75rem; font-weight: 500; }
+    .badge-blue { background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.2); color: #60a5fa; }
+
+    /* ===== Hero Connection Animation ===== */
+    .hero-connection { position: relative; }
+    .device-mac, .device-phone { position: relative; z-index: 2; }
+
+    /* Typing animation */
+    @keyframes typing { from { width: 0; } to { width: 100%; } }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+    .typing-line { overflow: hidden; white-space: nowrap; border-right: 2px solid #34d399; animation: typing 2s steps(30) forwards, blink 0.8s step-end infinite; width: 0; }
+    .typing-line-2 { animation-delay: 2.5s; }
+    .typing-line-3 { animation-delay: 4.5s; }
+
+    /* Flowing data dots between devices */
+    @keyframes flowRight {
+      0% { transform: translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+    @keyframes flowLeft {
+      0% { transform: translateX(100%); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(0); opacity: 0; }
+    }
+    .flow-dot {
+      position: absolute; width: 6px; height: 6px; border-radius: 50%;
+      animation-duration: 1.5s; animation-timing-function: ease-in-out; animation-iteration-count: infinite;
+    }
+    .flow-right { animation-name: flowRight; }
+    .flow-left { animation-name: flowLeft; }
+
+    /* Phone screen scroll */
+    @keyframes phoneScroll {
+      0%, 20% { transform: translateY(0); }
+      30%, 50% { transform: translateY(-40px); }
+      60%, 80% { transform: translateY(-80px); }
+      90%, 100% { transform: translateY(0); }
+    }
+    .phone-scroll { animation: phoneScroll 8s ease-in-out infinite; }
+
+    /* Agent icon pulse */
+    @keyframes agentPulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+    .agent-pulse { animation: agentPulse 2s ease-in-out infinite; }
+
+    /* Notification slide in */
+    @keyframes slideIn {
+      0% { transform: translateX(100%); opacity: 0; }
+      15%, 85% { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+    .notification-slide { animation: slideIn 4s ease-in-out infinite; }
+
+    /* Fade in on scroll */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s, transform 0.6s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* Pulse dot */
+    @keyframes pulseDot { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+    .pulse-dot { animation: pulseDot 2s ease-in-out infinite; }
+
+    /* Smooth line draw */
+    @keyframes drawLine {
+      from { stroke-dashoffset: 200; }
+      to { stroke-dashoffset: 0; }
+    }
+    .draw-line { stroke-dasharray: 200; animation: drawLine 2s ease-out forwards; }
+  </style>
+</head>
+<body class="text-white font-sans antialiased">
+
+  <!-- Nav -->
+  <nav class="fixed top-0 w-full z-50 bg-bg/80 backdrop-blur-xl border-b border-border/50">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2.5 text-lg font-semibold tracking-tight">
+        <img src="../logo.png" alt="AnyCode" class="w-7 h-7 rounded-md" />
+        AnyCode
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-sm text-muted">
+        <a href="#features" class="hover:text-white transition-colors">功能</a>
+        <a href="#connect" class="hover:text-white transition-colors">连接方式</a>
+        <a href="#quickstart" class="hover:text-white transition-colors">快速开始</a>
+        <a href="#faq" class="hover:text-white transition-colors">常见问题</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="../"
+           class="text-sm text-muted hover:text-white transition-colors font-medium">
+          EN
+        </a>
+        <a href="https://github.com/gurudin/anycoding" target="_blank"
+           class="flex items-center gap-2 text-sm text-muted hover:text-white transition-colors">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="https://github.com/gurudin/anycoding/releases" target="_blank"
+           class="bg-accent text-bg px-4 py-2 text-sm font-medium rounded-lg hover:bg-accent2 transition-colors">
+          下载
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO: Terminal ↔ Phone Connection ===== -->
+  <section class="pt-28 pb-16 px-6">
+    <div class="max-w-5xl mx-auto text-center">
+      <div class="flex justify-center gap-3 mb-6">
+        <span class="badge">MIT License</span>
+        <span class="badge">开源项目</span>
+      </div>
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
+        一个终端<br/>
+        <span class="gradient-text">所有编程 Agent</span>
+      </h1>
+      <p class="text-lg sm:text-xl text-muted max-w-2xl mx-auto mb-6">
+        在笔记本上运行 Claude Code、Codex 或任意 Agent —
+        用手机上的原生终端随时操控。
+      </p>
+      <!-- Agent logos -->
+      <div class="flex items-center justify-center gap-6 mb-10">
+        <div class="flex items-center gap-2 text-sm text-muted">
+          <span class="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center text-purple-400 text-base">🟣</span>
+          Claude Code
+        </div>
+        <div class="flex items-center gap-2 text-sm text-muted">
+          <span class="w-8 h-8 rounded-lg bg-green-500/15 flex items-center justify-center text-green-400 text-base">🟢</span>
+          Codex
+        </div>
+        <div class="flex items-center gap-2 text-sm text-muted">
+          <span class="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center text-blue-400 text-base">🔵</span>
+          任意 PTY Agent
+        </div>
+      </div>
+
+      <!-- ===== Animated Connection Visual ===== -->
+      <div class="hero-connection max-w-4xl mx-auto mb-10">
+        <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-0">
+
+          <!-- Mac Terminal -->
+          <div class="device-mac">
+            <div class="terminal-window glow text-left">
+              <div class="flex items-center gap-2 px-4 py-2.5 border-b border-border/50">
+                <div class="terminal-dots flex gap-1.5">
+                  <span class="bg-[#ff5f57] !w-[10px] !h-[10px]"></span>
+                  <span class="bg-[#febc2e] !w-[10px] !h-[10px]"></span>
+                  <span class="bg-[#28c840] !w-[10px] !h-[10px]"></span>
+                </div>
+                <span class="text-[10px] text-muted ml-2 font-mono">Terminal — ~/projects/web-app</span>
+              </div>
+              <div class="p-4 font-mono text-xs leading-relaxed h-[200px] overflow-hidden">
+                <p class="text-muted">$ any-coding claude</p>
+                <p class="mt-1.5"><span class="text-purple-400">claude</span> <span class="text-muted">›</span> <span class="text-white/80">Refactoring auth middleware...</span></p>
+                <p class="text-muted mt-1">● Reading src/middleware/auth.ts</p>
+                <p class="text-muted">● Reading src/lib/jwt.ts</p>
+                <p class="mt-1.5"><span class="text-accent">✓</span> Updated auth.ts <span class="text-accent text-[10px]">+12 -3</span></p>
+                <p><span class="text-accent">✓</span> Updated jwt.ts <span class="text-accent text-[10px]">+5 -1</span></p>
+                <p class="mt-1.5 text-yellow-300">? Run tests? <span class="text-muted">(y/n)</span> <span class="animate-pulse">█</span></p>
+                <p class="mt-3 text-muted">$ any-coding codex</p>
+                <p class="mt-1"><span class="text-green-400">codex</span> <span class="text-muted">›</span> <span class="text-white/80">Writing tests for auth...</span></p>
+              </div>
+            </div>
+            <p class="text-[10px] text-muted mt-2 font-mono text-center">💻 你的 Mac / Linux</p>
+          </div>
+
+          <!-- Connection Bridge (animated) -->
+          <div class="relative w-[120px] h-[200px] flex items-center justify-center">
+            <!-- Connection line -->
+            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 120 200">
+              <line x1="10" y1="100" x2="110" y2="100" stroke="#243029" stroke-width="1" stroke-dasharray="4,4" class="draw-line"/>
+            </svg>
+            <!-- Flowing dots (data) -->
+            <div class="absolute w-full" style="top:94px;">
+              <div class="flow-dot flow-right bg-accent" style="animation-delay:0s;left:10px;"></div>
+              <div class="flow-dot flow-right bg-purple-400" style="animation-delay:0.5s;left:10px;"></div>
+              <div class="flow-dot flow-left bg-cloud" style="animation-delay:0.8s;left:10px;"></div>
+              <div class="flow-dot flow-right bg-green-400" style="animation-delay:1.2s;left:10px;"></div>
+            </div>
+            <!-- Label -->
+            <div class="absolute bottom-[60px] w-full text-center">
+              <span class="text-[9px] text-muted font-mono bg-bg px-2">WSS ENCRYPTED</span>
+            </div>
+            <div class="absolute bottom-[42px] w-full text-center">
+              <span class="text-[9px] text-accent font-mono bg-bg px-2">REAL-TIME SYNC</span>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="device-phone">
+            <div class="w-[200px] mx-auto bg-[#0d1210] rounded-[28px] border-2 border-[#2a3832] p-2.5 glow" style="aspect-ratio: 9/19.5;">
+              <!-- Phone notch -->
+              <div class="w-16 h-1.5 bg-[#2a3832] rounded-full mx-auto mb-1.5"></div>
+              <!-- Phone screen -->
+              <div class="bg-[#080c0a] rounded-[20px] overflow-hidden h-full flex flex-col">
+                <!-- Status bar -->
+                <div class="flex items-center justify-between px-3 py-1 text-[7px] text-muted/60">
+                  <span>9:41</span>
+                  <span>●●●● WiFi 🔋</span>
+                </div>
+                <!-- Tab bar -->
+                <div class="flex border-b border-border/50 text-[9px]">
+                  <div class="flex items-center gap-1 px-3 py-2 border-r border-border/50 bg-surface/50">
+                    <span>🟣</span><span class="text-white font-medium">claude</span>
+                  </div>
+                  <div class="flex items-center gap-1 px-3 py-2 text-muted">
+                    <span>🟢</span><span>codex</span>
+                  </div>
+                </div>
+                <!-- Terminal content (scrolling) -->
+                <div class="flex-1 overflow-hidden">
+                  <div class="phone-scroll p-3 font-mono text-[8px] leading-[15px] text-white/80">
+                    <p><span class="text-purple-400">claude</span> <span class="text-muted">›</span> Refactoring auth...</p>
+                    <p class="text-muted">● Reading auth.ts</p>
+                    <p class="text-muted">● Reading jwt.ts</p>
+                    <p><span class="text-accent">✓</span> auth.ts <span class="text-accent">+12</span></p>
+                    <p><span class="text-accent">✓</span> jwt.ts <span class="text-accent">+5</span></p>
+                    <p class="text-yellow-300">? Run tests? (y/n) █</p>
+                    <p class="mt-3 text-muted">--- switch tab ---</p>
+                    <p class="mt-1"><span class="text-green-400">codex</span> <span class="text-muted">›</span> Writing tests...</p>
+                    <p class="text-muted">● Creating auth.test.ts</p>
+                    <p><span class="text-accent">✓</span> 5 tests passed</p>
+                    <p class="mt-3 text-muted">--- back to claude ---</p>
+                    <p class="mt-1"><span class="text-purple-400">claude</span> <span class="text-muted">›</span> Tests passed.</p>
+                    <p><span class="text-accent">✓</span> Committed changes</p>
+                    <p class="text-muted mt-1">❯ _</p>
+                  </div>
+                </div>
+                <!-- Bottom bar -->
+                <div class="flex items-center justify-between px-3 py-1.5 border-t border-border/50 bg-surface/30">
+                  <span class="text-[8px] text-accent">🔗 connected</span>
+                  <span class="text-[8px] text-muted">2 sessions</span>
+                </div>
+              </div>
+              <!-- Home indicator -->
+              <div class="w-12 h-1 bg-[#2a3832] rounded-full mx-auto mt-1.5"></div>
+            </div>
+            <p class="text-[10px] text-muted mt-2 font-mono text-center">📱 你的手机</p>
+          </div>
+
+        </div>
+
+        <!-- Notification popup -->
+        <div class="absolute top-4 right-4 notification-slide" style="animation-delay: 3s;">
+          <div class="bg-surface border border-border rounded-xl p-3 flex items-center gap-2 shadow-xl max-w-[240px]">
+            <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+              <svg width="14" height="14" class="text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+            </div>
+            <div>
+              <p class="text-[10px] font-medium">Claude 等待输入</p>
+              <p class="text-[9px] text-muted">Run tests? (y/n)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#connect"
+           class="bg-cloud text-white px-6 py-3 text-sm font-semibold rounded-lg hover:bg-cloud2 transition-colors">
+          使用云端中继 — 零配置 →
+        </a>
+        <a href="#quickstart"
+           class="border border-border text-muted px-6 py-3 text-sm font-medium rounded-lg hover:text-white hover:border-accent/50 transition-colors">
+          使用 --public 自部署
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supported Agents -->
+  <section class="py-12 px-6 border-y border-border/30">
+    <div class="max-w-4xl mx-auto">
+      <p class="text-center text-sm text-muted mb-6">兼容所有基于终端的编程 Agent</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="feature-card p-4 flex items-center gap-3">
+          <span class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-xl agent-pulse">🟣</span>
+          <div>
+            <p class="text-sm font-medium">Claude Code</p>
+            <p class="text-[11px] text-muted">Anthropic</p>
+          </div>
+        </div>
+        <div class="feature-card p-4 flex items-center gap-3">
+          <span class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-xl agent-pulse" style="animation-delay:0.3s">🟢</span>
+          <div>
+            <p class="text-sm font-medium">Codex</p>
+            <p class="text-[11px] text-muted">OpenAI</p>
+          </div>
+        </div>
+        <div class="feature-card p-4 flex items-center gap-3">
+          <span class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-xl agent-pulse" style="animation-delay:0.6s">🔵</span>
+          <div>
+            <p class="text-sm font-medium">OpenCode</p>
+            <p class="text-[11px] text-muted">即将推出</p>
+          </div>
+        </div>
+        <div class="feature-card p-4 flex items-center gap-3 border-dashed">
+          <span class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-xl">⚡</span>
+          <div>
+            <p class="text-sm font-medium">任意 PTY Agent</p>
+            <p class="text-[11px] text-muted">能在终端运行就能用</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONNECTION MODES (Cloud first) ===== -->
+  <section id="connect" class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">三种连接方式</h2>
+        <p class="text-muted text-lg">选择适合你的方式，随时切换。</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+
+        <!-- Cloud (recommended) -->
+        <div class="feature-card p-6 border-cloud/40 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-cloud text-white text-[10px] font-semibold px-3 py-1 rounded-bl-lg">推荐</div>
+          <div class="flex items-center gap-3 mb-4 mt-2">
+            <div class="w-10 h-10 rounded-lg bg-cloud/10 flex items-center justify-center">
+              <svg width="20" height="20" class="text-cloud" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold">云端中继</h3>
+              <span class="text-cloud text-xs font-medium">零配置 · 扫一次码</span>
+            </div>
+          </div>
+          <ul class="space-y-2.5 text-muted text-sm mb-6">
+            <li class="flex items-start gap-2"><span class="text-cloud mt-0.5">✓</span> 无需安装隧道</li>
+            <li class="flex items-start gap-2"><span class="text-cloud mt-0.5">✓</span> 扫一次码，永久连接</li>
+            <li class="flex items-start gap-2"><span class="text-cloud mt-0.5">✓</span> 跨网络随处可用</li>
+            <li class="flex items-start gap-2"><span class="text-cloud mt-0.5">✓</span> 跨设备会话同步</li>
+            <li class="flex items-start gap-2"><span class="text-cloud mt-0.5">✓</span> 云端会话历史</li>
+          </ul>
+          <div class="code-block px-3 py-2 text-xs font-mono text-center text-muted mb-3">
+            any-coding
+          </div>
+          <p class="text-center text-[11px] text-muted">直接运行 — 云端中继自动处理一切</p>
+        </div>
+
+        <!-- Cloudflared (self-hosted) -->
+        <div class="feature-card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+              <svg width="20" height="20" class="text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold">公网隧道</h3>
+              <span class="text-accent text-xs font-medium">自部署 · 永久免费</span>
+            </div>
+          </div>
+          <ul class="space-y-2.5 text-muted text-sm mb-6">
+            <li class="flex items-start gap-2"><span class="text-accent mt-0.5">✓</span> Cloudflare 快速隧道</li>
+            <li class="flex items-start gap-2"><span class="text-accent mt-0.5">✓</span> 无需注册账号</li>
+            <li class="flex items-start gap-2"><span class="text-accent mt-0.5">✓</span> 代码不经过第三方</li>
+            <li class="flex items-start gap-2"><span class="text-accent mt-0.5">✓</span> 随处可访问</li>
+            <li class="flex items-start gap-2"><span class="text-muted mt-0.5">–</span> <span class="text-muted">重启后 URL 会变</span></li>
+          </ul>
+          <div class="code-block px-3 py-2 text-xs font-mono text-center text-muted mb-3">
+            any-coding hub --public
+          </div>
+          <p class="text-center text-[11px] text-muted">需先安装 <code class="text-accent/70">cloudflared</code></p>
+        </div>
+
+        <!-- LAN -->
+        <div class="feature-card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+              <svg width="20" height="20" class="text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold">局域网模式</h3>
+              <span class="text-muted text-xs">同一 Wi-Fi · 最简单</span>
+            </div>
+          </div>
+          <ul class="space-y-2.5 text-muted text-sm mb-6">
+            <li class="flex items-start gap-2"><span class="text-white/40 mt-0.5">✓</span> 零外部依赖</li>
+            <li class="flex items-start gap-2"><span class="text-white/40 mt-0.5">✓</span> 最低延迟</li>
+            <li class="flex items-start gap-2"><span class="text-white/40 mt-0.5">✓</span> 支持离线环境</li>
+            <li class="flex items-start gap-2"><span class="text-muted mt-0.5">–</span> <span class="text-muted">仅限同一网络</span></li>
+            <li class="flex items-start gap-2"><span class="text-muted mt-0.5">–</span> <span class="text-muted">需手动输入 IP</span></li>
+          </ul>
+          <div class="code-block px-3 py-2 text-xs font-mono text-center text-muted mb-3">
+            any-coding hub --public --tunnel=none
+          </div>
+          <p class="text-center text-[11px] text-muted">手机和电脑需在同一 Wi-Fi</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section id="features" class="py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Feature 1: Real Terminal -->
+      <div class="grid md:grid-cols-2 gap-12 items-center mb-24 reveal">
+        <div>
+          <span class="badge mb-4 inline-block">原生终端</span>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            真正的 PTY 终端，<br/>不是聊天窗口
+          </h2>
+          <p class="text-muted text-lg leading-relaxed mb-4">
+            AnyCode 在你的手机上渲染真实的终端流 — ANSI 颜色、
+            进度条、交互提示，甚至 vim。笔记本上看到什么，
+            手机上就看到什么。
+          </p>
+          <p class="text-sm text-muted">
+            不同于聊天式 UI 丢失格式和上下文，
+            AnyCode 给你原汁原味的终端体验。
+          </p>
+        </div>
+        <div class="terminal-window glow">
+          <div class="flex items-center gap-2 px-4 py-2.5 border-b border-border/50">
+            <div class="terminal-dots flex gap-1.5">
+              <span class="bg-[#ff5f57] !w-[10px] !h-[10px]"></span>
+              <span class="bg-[#febc2e] !w-[10px] !h-[10px]"></span>
+              <span class="bg-[#28c840] !w-[10px] !h-[10px]"></span>
+            </div>
+            <span class="text-[10px] text-muted ml-2 font-mono">📱 手机端 — 与笔记本完全同步</span>
+          </div>
+          <div class="p-5 font-mono text-sm leading-relaxed">
+            <p><span class="text-purple-400">claude</span> <span class="text-muted">›</span> Fix the auth middleware</p>
+            <p class="mt-2 text-muted">● Reading src/middleware/auth.ts</p>
+            <p class="text-muted">● Reading src/lib/jwt.ts</p>
+            <p class="mt-2"><span class="text-accent">✓</span> Updated auth.ts <span class="text-accent">+12</span> <span class="text-red-400">-3</span></p>
+            <p><span class="text-accent">✓</span> Updated jwt.ts <span class="text-accent">+5</span> <span class="text-red-400">-1</span></p>
+            <p class="mt-2"><span class="text-blue-400">ℹ</span> <span class="text-muted">Running: </span><span class="text-white">npm test</span></p>
+            <p class="mt-1 text-accent">████████████████████░░░░ 80% <span class="text-muted">tests passing</span></p>
+            <p class="mt-2 text-yellow-300">? Commit changes? <span class="text-muted">(y/n)</span> <span class="animate-pulse">█</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 2: Camera -->
+      <div class="grid md:grid-cols-2 gap-12 items-center mb-24 reveal">
+        <div class="order-2 md:order-1">
+          <div class="feature-card p-8 glow">
+            <div class="space-y-4">
+              <div class="bg-surface rounded-lg p-4 border border-border/50">
+                <div class="flex items-center gap-2 mb-3">
+                  <div class="w-6 h-6 rounded bg-accent/20 flex items-center justify-center text-xs">📷</div>
+                  <span class="text-sm text-muted">whiteboard-arch.jpg</span>
+                  <span class="text-xs text-accent ml-auto">sent to claude</span>
+                </div>
+                <div class="w-full h-20 bg-surface2 rounded flex items-center justify-center text-muted text-xs border border-border/30">
+                  <span>[ architecture diagram ]</span>
+                </div>
+              </div>
+              <div class="bg-surface rounded-lg p-4 border border-border/50">
+                <p class="text-sm"><span class="text-purple-400">claude</span> <span class="text-muted">›</span> I see the diagram. Restructuring API routes to match...</p>
+                <p class="text-[11px] text-muted mt-2">● Updating src/routes/ based on diagram</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="order-1 md:order-2">
+          <span class="badge mb-4 inline-block">移动端原生能力</span>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            拍张照，<br/>直接喂给 Agent
+          </h2>
+          <p class="text-muted text-lg leading-relaxed">
+            白板草图、报错截图、架构图 —
+            从手机摄像头直接发送给 Agent 作为上下文。
+            这是 SSH + tmux 永远做不到的。
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 3: Notifications -->
+      <div class="grid md:grid-cols-2 gap-12 items-center mb-24 reveal">
+        <div>
+          <span class="badge mb-4 inline-block">智能通知</span>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            Agent 需要你时，<br/>第一时间知道
+          </h2>
+          <p class="text-muted text-lg leading-relaxed">
+            启动任务后放下手机。Agent 遇到交互提示时
+            收到推送通知 — 不只是任务完成时才通知。
+            再也不会错过 <code class="text-accent">(y/n)</code> 确认。
+          </p>
+        </div>
+        <div class="feature-card p-8">
+          <div class="space-y-3">
+            <div class="bg-surface rounded-xl p-4 border border-border/50 flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium">Claude 等待输入</p>
+                <p class="text-xs text-muted mt-0.5">web-app — "Run tests? (y/n)"</p>
+              </div>
+              <span class="pulse-dot w-2 h-2 rounded-full bg-accent shrink-0 mt-2"></span>
+            </div>
+            <div class="bg-surface rounded-xl p-4 border border-border/50 flex items-start gap-3 opacity-60">
+              <div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium">Codex 任务已完成</p>
+                <p class="text-xs text-muted mt-0.5">payments — 5 tests passed</p>
+              </div>
+            </div>
+            <div class="bg-surface rounded-xl p-4 border border-border/50 flex items-start gap-3 opacity-40">
+              <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium">构建失败</p>
+                <p class="text-xs text-muted mt-0.5">infra — exit code 1</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 4: Multi-agent -->
+      <div class="grid md:grid-cols-2 gap-12 items-center reveal">
+        <div class="order-2 md:order-1">
+          <div class="terminal-window glow">
+            <div class="flex items-center border-b border-border/50">
+              <div class="flex items-center gap-2 px-4 py-2.5 border-r border-border/50 bg-surface/50">
+                <span class="text-sm">🟣</span><span class="text-sm font-medium">claude</span>
+                <span class="text-[10px] text-muted">web-app</span>
+              </div>
+              <div class="flex items-center gap-2 px-4 py-2.5 border-r border-border/50 text-muted">
+                <span class="text-sm">🟢</span><span class="text-sm">codex</span>
+                <span class="text-[10px]">tests</span>
+              </div>
+              <div class="ml-auto px-4">
+                <span class="text-[10px] text-muted font-mono">2 agents</span>
+              </div>
+            </div>
+            <div class="p-5 font-mono text-sm leading-relaxed">
+              <p><span class="text-purple-400">claude</span> <span class="text-muted">›</span> Payment webhook handler done.</p>
+              <p><span class="text-accent">✓</span> Created stripe.ts <span class="text-accent">+48</span></p>
+              <p class="mt-3"><span class="text-green-400">codex</span> <span class="text-muted">›</span> <span class="text-white/60">(background)</span> Writing tests...</p>
+              <p class="text-muted text-xs mt-1">● stripe.test.ts — 3/5 assertions</p>
+              <p class="mt-3"><span class="text-purple-400">claude</span> <span class="text-muted">›</span> Ready for next task.</p>
+              <p class="text-muted text-xs mt-1">❯ <span class="animate-pulse">_</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="order-1 md:order-2">
+          <span class="badge mb-4 inline-block">多 Agent 协同</span>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            多个 Agent，<br/>一个屏幕
+          </h2>
+          <p class="text-muted text-lg leading-relaxed">
+            同时运行 Claude 和 Codex。每个 Agent 独立 tab，图标区分。
+            Claude 写代码，Codex 写测试 — 在手机上同时监控。
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section id="quickstart" class="py-20 px-6 border-t border-border/30">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">60 秒启动</h2>
+      </div>
+
+      <!-- Cloud path (primary) -->
+      <div class="mb-8">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-6 h-6 rounded bg-cloud/20 flex items-center justify-center">
+            <svg width="14" height="14" class="text-cloud" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+          </div>
+          <span class="text-sm font-medium text-cloud">云端中继（推荐）</span>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="feature-card p-5 text-center">
+            <div class="w-10 h-10 rounded-xl bg-cloud/10 flex items-center justify-center mx-auto mb-3">
+              <span class="text-cloud text-lg font-bold font-mono">1</span>
+            </div>
+            <h3 class="font-semibold text-sm mb-2">安装</h3>
+            <div class="code-block px-3 py-2 text-[11px] font-mono text-muted">npm i -g any-coding</div>
+          </div>
+          <div class="feature-card p-5 text-center">
+            <div class="w-10 h-10 rounded-xl bg-cloud/10 flex items-center justify-center mx-auto mb-3">
+              <span class="text-cloud text-lg font-bold font-mono">2</span>
+            </div>
+            <h3 class="font-semibold text-sm mb-2">运行</h3>
+            <div class="code-block px-3 py-2 text-[11px] font-mono text-muted">any-coding</div>
+          </div>
+          <div class="feature-card p-5 text-center">
+            <div class="w-10 h-10 rounded-xl bg-cloud/10 flex items-center justify-center mx-auto mb-3">
+              <span class="text-cloud text-lg font-bold font-mono">3</span>
+            </div>
+            <h3 class="font-semibold text-sm mb-2">扫码连接</h3>
+            <p class="text-[11px] text-muted">打开 App → 扫码 → 完成</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Self-hosted path -->
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-6 h-6 rounded bg-accent/20 flex items-center justify-center">
+            <svg width="14" height="14" class="text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <span class="text-sm font-medium text-accent">自部署（永久免费）</span>
+        </div>
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="feature-card p-4 text-center">
+            <span class="text-accent font-bold font-mono">1</span>
+            <div class="code-block px-2 py-1.5 text-[10px] font-mono text-muted mt-2">npm i -g any-coding</div>
+          </div>
+          <div class="feature-card p-4 text-center">
+            <span class="text-accent font-bold font-mono">2</span>
+            <div class="code-block px-2 py-1.5 text-[10px] font-mono text-muted mt-2">brew install cloudflared</div>
+          </div>
+          <div class="feature-card p-4 text-center">
+            <span class="text-accent font-bold font-mono">3</span>
+            <div class="code-block px-2 py-1.5 text-[10px] font-mono text-muted mt-2">any-coding hub --public</div>
+          </div>
+          <div class="feature-card p-4 text-center">
+            <span class="text-accent font-bold font-mono">4</span>
+            <p class="text-[11px] text-muted mt-2">扫码 → 完成</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-20 px-6 border-t border-border/30">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-12 text-center">常见问题</h2>
+      <div class="space-y-4">
+        <details class="feature-card p-5 group" open>
+          <summary class="cursor-pointer flex items-center justify-between font-medium text-sm">
+            支持哪些 Agent？
+            <svg class="w-5 h-5 text-muted group-open:rotate-45 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">
+            Claude Code、OpenAI Codex，以及任何在 PTY 中运行的终端 Agent。
+            AnyCode 不解析 Agent 输出 — 它直接渲染原始终端流。
+            只要能在你的终端里运行，就能在你的手机上使用。
+          </p>
+        </details>
+        <details class="feature-card p-5 group">
+          <summary class="cursor-pointer flex items-center justify-between font-medium text-sm">
+            云端中继和自部署，该选哪个？
+            <svg class="w-5 h-5 text-muted group-open:rotate-45 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">
+            <strong class="text-white">云端中继</strong>最简单 — 扫一次码，随时随地都能用。
+            <strong class="text-white">自部署</strong>（cloudflared）完全免费，但每次重启 URL 会变，需要重新扫码。
+            <strong class="text-white">局域网</strong>模式最简单，但手机和电脑必须在同一 Wi-Fi 下。
+            建议先用云端中继，需要完全掌控时再切换到自部署。
+          </p>
+        </details>
+        <details class="feature-card p-5 group">
+          <summary class="cursor-pointer flex items-center justify-between font-medium text-sm">
+            我的代码安全吗？
+            <svg class="w-5 h-5 text-muted group-open:rotate-45 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">
+            自部署模式下，手机直连你的电脑 — 中间没有任何服务器。
+            云端中继仅转发字节流，不存储 PTY 内容。两种模式都使用 WSS 加密。
+            如果你追求最高隐私，随时可以切换到自部署模式。
+          </p>
+        </details>
+        <details class="feature-card p-5 group">
+          <summary class="cursor-pointer flex items-center justify-between font-medium text-sm">
+            为什么是真终端而不是聊天界面？
+            <svg class="w-5 h-5 text-muted group-open:rotate-45 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">
+            聊天式 UI 会重新组织 Agent 输出 — 你会丢失 ANSI 格式、进度条、
+            交互提示，也无法运行 vim 或 htop。
+            AnyCode 渲染真实的 PTY 流，手机上看到的和笔记本上完全一致，
+            不丢失任何信息。
+          </p>
+        </details>
+        <details class="feature-card p-5 group">
+          <summary class="cursor-pointer flex items-center justify-between font-medium text-sm">
+            支持 iOS 吗？
+            <svg class="w-5 h-5 text-muted group-open:rotate-45 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">
+            目前优先支持 Android。iOS 已在路线图中 — 关注 GitHub 仓库获取最新动态。
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 px-6 border-t border-border/30">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">随时随地开始编码</h2>
+      <p class="text-muted text-lg mb-8">一次安装，一次扫码，所有编程 Agent 尽在手机。</p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#connect"
+           class="bg-cloud text-white px-6 py-3 text-sm font-semibold rounded-lg hover:bg-cloud2 transition-colors">
+          使用云端中继 →
+        </a>
+        <a href="https://github.com/gurudin/anycoding" target="_blank"
+           class="border border-border text-muted px-6 py-3 text-sm font-medium rounded-lg hover:text-white hover:border-accent/50 transition-colors">
+          在 GitHub 上查看
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-border/50 py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <h4 class="text-sm font-semibold mb-4">产品</h4>
+          <ul class="space-y-2 text-sm text-muted">
+            <li><a href="#features" class="hover:text-white transition-colors">功能</a></li>
+            <li><a href="#connect" class="hover:text-white transition-colors">连接方式</a></li>
+            <li><a href="#quickstart" class="hover:text-white transition-colors">快速开始</a></li>
+            <li><a href="#faq" class="hover:text-white transition-colors">常见问题</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold mb-4">Agent</h4>
+          <ul class="space-y-2 text-sm text-muted">
+            <li><a href="https://docs.anthropic.com/en/docs/claude-code" target="_blank" class="hover:text-white transition-colors">Claude Code</a></li>
+            <li><a href="https://openai.com/index/introducing-codex/" target="_blank" class="hover:text-white transition-colors">Codex</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold mb-4">社区</h4>
+          <ul class="space-y-2 text-sm text-muted">
+            <li><a href="https://github.com/gurudin/anycoding" target="_blank" class="hover:text-white transition-colors">GitHub</a></li>
+            <li><a href="https://github.com/gurudin/anycoding/issues" target="_blank" class="hover:text-white transition-colors">Issues</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold mb-4">下载</h4>
+          <ul class="space-y-2 text-sm text-muted">
+            <li><a href="https://github.com/gurudin/anycoding/releases" target="_blank" class="hover:text-white transition-colors">Android APK</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Google Play（即将上线）</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">iOS（规划中）</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-border/50 text-sm text-muted">
+        <p>MIT License &middot; 由 <a href="https://gurudin.github.io" class="hover:text-white transition-colors">Gurudin</a> 构建</p>
+        <p class="mt-2 sm:mt-0">AnyCode — 所有编程 Agent，尽在手机。</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll reveal -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" />
+
+  <!-- noscript fallback -->
+  <noscript>
+    <style>.reveal { opacity: 1; transform: none; } .phone-scroll { animation: none; }</style>
+  </noscript>
+
+</body>
+</html>

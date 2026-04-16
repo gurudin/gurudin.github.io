@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AnyCode – Run Claude Code, Codex & coding agents from your phone</title>
+  <meta name="description" content="AnyCode is an open-source native mobile terminal for Claude Code, Codex, and any PTY-based coding agent. Self-hosted via Cloudflare tunnel or cloud relay. Real terminal rendering, not a chat simulator. MIT license." />
+  <meta name="keywords" content="claude code mobile, codex mobile, coding agent phone, remote terminal, claude code remote, mobile terminal, self-hosted, open source, cloudflare tunnel, any-coding, anycoding" />
+  <meta name="author" content="Gurudin" />
+  <meta name="theme-color" content="#0a0f0d" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://gurudin.github.io/anycoding/" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="AnyCode – Run coding agents from your phone" />
+  <meta property="og:description" content="One native mobile terminal for Claude Code, Codex, and any coding agent. Cloud relay or self-hosted. Real PTY, open source, MIT license." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://gurudin.github.io/anycoding/" />
+  <meta property="og:image" content="https://gurudin.github.io/anycoding/og-image.png" />
+  <meta property="og:site_name" content="AnyCode" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AnyCode – Run coding agents from your phone" />
+  <meta name="twitter:description" content="Native mobile terminal for Claude Code & Codex. Self-hosted or cloud. Open source." />
+  <meta name="twitter:image" content="https://gurudin.github.io/anycoding/og-image.png" />
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "AnyCode",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Android",
+    "description": "A native mobile terminal for Claude Code, Codex, and any PTY-based coding agent. Self-hosted or cloud relay.",
+    "url": "https://gurudin.github.io/anycoding/",
+    "downloadUrl": "https://github.com/gurudin/anycoding/releases",
+    "softwareVersion": "0.1.0",
+    "license": "https://opensource.org/licenses/MIT",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Gurudin",
+      "url": "https://gurudin.github.io"
+    },
+    "keywords": ["claude code", "codex", "mobile terminal", "coding agent", "self-hosted", "open source"]
+  }
+  </script>
+
+  <link rel="icon" href="favicon.ico" sizes="32x32" />
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: '#0a0f0d',
+            surface: '#131a17',
+            surface2: '#1a2320',
+            border: '#243029',
+            accent: '#34d399',
+            accent2: '#6ee7b7',
+            muted: '#8a9b93',
+            cloud: '#60a5fa',
+            cloud2: '#93c5fd',
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Inter', 'Segoe UI', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { background: #0a0f0d; }
+    .gradient-text {
+      background: linear-gradient(135deg, #34d399 0%, #6ee7b7 50%, #a7f3d0 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .gradient-text-blue {
+      background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 50%, #bfdbfe 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .glow { box-shadow: 0 0 60px rgba(52, 211, 153, 0.08); }
+    .glow-blue { box-shadow: 0 0 60px rgba(96, 165, 250, 0.08); }
+    .terminal-window { background: #0d1210; border: 1px solid #243029; border-radius: 12px; overflow: hidden; }
+    .terminal-dots span { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .feature-card {
+      background: linear-gradient(180deg, #131a17 0%, #0f1513 100%);
+      border: 1px solid #243029; border-radius: 16px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .feature-card:hover { border-color: #34d399; box-shadow: 0 0 40px rgba(52, 211, 153, 0.06); }
+    .code-block { background: #0d1210; border: 1px solid #1e2a25; border-radius: 8px; font-family: 'JetBrains Mono', monospace; }
+    .badge { background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); color: #34d399; border-radius: 9999px; padding: 4px 12px; font-size: 0.75rem; font-weight: 500; }
+    .badge-blue { background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.2); color: #60a5fa; }
+
+    /* ===== Hero Connection Animation ===== */
+    .hero-connection { position: relative; }
+    .device-mac, .device-phone { position: relative; z-index: 2; }
+
+    /* Typing animation */
+    @keyframes typing { from { width: 0; } to { width: 100%; } }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+    .typing-line { overflow: hidden; white-space: nowrap; border-right: 2px solid #34d399; animation: typing 2s steps(30) forwards, blink 0.8s step-end infinite; width: 0; }
+    .typing-line-2 { animation-delay: 2.5s; }
+    .typing-line-3 { animation-delay: 4.5s; }
+
+    /* Flowing data dots between devices */
+    @keyframes flowRight {
+      0% { transform: translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+    @keyframes flowLeft {
+      0% { transform: translateX(100%); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(0); opacity: 0; }
+    }
+    .flow-dot {
+      position: absolute; width: 6px; height: 6px; border-radius: 50%;
+      animation-duration: 1.5s; animation-timing-function: ease-in-out; animation-iteration-count: infinite;
+    }
+    .flow-right { animation-name: flowRight; }
+    .flow-left { animation-name: flowLeft; }
+
+    /* Phone screen scroll */
+    @keyframes phoneScroll {
+      0%, 20% { transform: translateY(0); }
+      30%, 50% { transform: translateY(-40px); }
+      60%, 80% { transform: translateY(-80px); }
+      90%, 100% { transform: translateY(0); }
+    }
+    .phone-scroll { animation: phoneScroll 8s ease-in-out infinite; }
+
+    /* Agent icon pulse */
+    @keyframes agentPulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+    .agent-pulse { animation: agentPulse 2s ease-in-out infinite; }
+
+    /* Notification slide in */
+    @keyframes slideIn {
+      0% { transform: translateX(100%); opacity: 0; }
+      15%, 85% { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+    .notification-slide { animation: slideIn 4s ease-in-out infinite; }
+
+    /* Fade in on scroll */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s, transform 0.6s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* Pulse dot */
+    @keyframes pulseDot { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+    .pulse-dot { animation: pulseDot 2s ease-in-out infinite; }
+
+    /* Smooth line draw */
+    @keyframes drawLine {
+      from { stroke-dashoffset: 200; }
+      to { stroke-dashoffset: 0; }
+    }
+    .draw-line { stroke-dasharray: 200; animation: drawLine 2s ease-out forwards; }
+  </style>
+</head>
+<body class="text-white font-sans antialiased">
+
+  <!-- Nav -->
+  <nav class="fixed top-0 w-full z-50 bg-bg/80 backdrop-blur-xl border-b border-border/50">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2.5 text-lg font-semibold tracking-tight">
+        <img src="logo.png" alt="AnyCode" class="w-7 h-7 rounded-md" />
+        AnyCode
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-sm text-muted">
+        <a href="#features" class="hover:text-white transition-colors">Features</a>
+        <a href="#connect" class="hover:text-white transition-colors">Connect</a>
+        <a href="#quickstart" class="hover:text-white transition-colors">Quick Start</a>
+        <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="zh/" class="text-sm text-muted hover:text-white transition-colors border border-border rounded-md px-2.5 py-1.5 flex items-center gap-1.5">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          中文
+        </a>
+        <a href="https://github.com/gurudin/anycoding" target="_blank"
+           class="flex items-center gap-2 text-sm text-muted hover:text-white transition-colors">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="https://github.com/gurudin/anycoding/releases" target="_blank"
+           class="bg-accent text-bg px-4 py-2 text-sm font-medium rounded-lg hover:bg-accent2 transition-colors">
+          Download
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO: Terminal ↔ Phone Connection ===== -->
+  <section class="pt-28 pb-16 px-6">
+    <div class="max-w-5xl mx-auto text-center">
+      <div class="flex justify-center gap-3 mb-6">
+        <span class="badge">MIT License</span>
+        <span class="badge">Open Source</span>
+      </div>
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
+        One terminal for<br/>
+        <span class="gradient-text">every coding agent</span>
+      </h1>
+      <p class="text-lg sm:text-xl text-muted max-w-2xl mx-auto mb-6">
+        Run Claude Code, Codex, or any agent on your laptop —
+        control it from your phone with a real native terminal.
+      </p>
+      <!-- Agent logos -->
+      <div class="flex items-center justify-center gap-6 mb-10">
+        <div class="flex items-center gap-2 text-sm text-muted">
+          <span class="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center text-purple-400 text-base">🟣</span>
+          Claude Code
+        </div>
+        <div class="flex items-center gap-2 text-sm text-muted">
+          <span class="w-8 h-8 rounded-lg bg-green-500/15 flex items-center justify-center text-green-400 text-base">🟢</span>
+          Codex
+        </div>
+        <div class="flex items-center gap-2 text-sm text-muted">
+          <span class="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center text-blue-400 text-base">🔵</span>
+          Any PTY agent
+        </div>
+      </div>
+
+      <!-- ===== Animated Connection Visual ===== -->
+      <div class="hero-connection max-w-4xl mx-auto mb-10">
+        <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-0">
+
+          <!-- Mac Terminal -->
+          <div class="device-mac">
+            <div class="terminal-window glow text-left">
+              <div class="flex items-center gap-2 px-4 py-2.5 border-b border-border/50">
+                <div class="terminal-dots flex gap-1.5">
+                  <span class="bg-[#ff5f57] !w-[10px] !h-[10px]"></span>
+                  <span class="bg-[#febc2e] !w-[10px] !h-[10px]"></span>
+                  <span class="bg-[#28c840] !w-[10px] !h-[10px]"></span>
+                </div>
+                <span class="text-[10px] text-muted ml-2 font-mono">Terminal — ~/projects/web-app</span>
+              </div>
+              <div class="p-4 font-mono text-xs leading-relaxed h-[200px] overflow-hidden">
+                <p class="text-muted">$ any-coding claude</p>
+                <p class="mt-1.5"><span class="text-purple-400">claude</span> <span class="text-muted">›</span> <span class="text-white/80">Refactoring auth middleware...</span></p>
+                <p class="text-muted mt-1">● Reading src/middleware/auth.ts</p>
+                <p class="text-muted">● Reading src/lib/jwt.ts</p>
+                <p class="mt-1.5"><span class="text-accent">✓</span> Updated auth.ts <span class="text-accent text-[10px]">+12 -3</span></p>
+                <p><span class="text-accent">✓</span> Updated jwt.ts <span class="text-accent text-[10px]">+5 -1</span></p>
+                <p class="mt-1.5 text-yellow-300">? Run tests? <span class="text-muted">(y/n)</span> <span class="animate-pulse">█</span></p>
+                <p class="mt-3 text-muted">$ any-coding codex</p>
+                <p class="mt-1"><span class="text-green-400">codex</span> <span class="text-muted">›</span> <span class="text-white/80">Writing tests for auth...</span></p>
+              </div>
+            </div>
+            <p class="text-[10px] text-muted mt-2 font-mono text-center">💻 Your Mac / Linux</p>
+          </div>
+
+          <!-- Connection Bridge (animated) -->
+          <div class="relative w-[120px] h-[200px] flex items-center justify-center">
+            <!-- Connection line -->
+            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 120 200">
+              <line x1="10" y1="100" x2="110" y2="100" stroke="#243029" stroke-width="1" stroke-dasharray="4,4" class="draw-line"/>
+            </svg>
+            <!-- Flowing dots (data) -->
+            <div class="absolute w-full" style="top:94px;">
+              <div class="flow-dot flow-right bg-accent" style="animation-delay:0s;left:10px;"></div>
+              <div class="flow-dot flow-right bg-purple-400" style="animation-delay:0.5s;left:10px;"></div>
+              <div class="flow-dot flow-left bg-cloud" style="animation-delay:0.8s;left:10px;"></div>
+              <div class="flow-dot flow-right bg-green-400" style="animation-delay:1.2s;left:10px;"></div>
+            </div>
+            <!-- Label -->
+            <div class="absolute bottom-[60px] w-full text-center">
+              <span class="text-[9px] text-muted font-mono bg-bg px-2">WSS ENCRYPTED</span>
+            </div>
+            <div class="absolute bottom-[42px] w-full text-center">
+              <span class="text-[9px] text-accent font-mono bg-bg px-2">REAL-TIME SYNC</span>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="device-phone">
+            <div class="w-[200px] mx-auto bg-[#0d1210] rounded-[28px] border-2 border-[#2a3832] p-2.5 glow" style="aspect-ratio: 9/19.5;">
+              <!-- Phone notch -->
+              <div class="w-16 h-1.5 bg-[#2a3832] rounded-full mx-auto mb-1.5"></div>
+              <!-- Phone screen -->
+              <div class="bg-[#080c0a] rounded-[20px] overflow-hidden h-full flex flex-col">
+                <!-- Status bar -->
+                <div class="flex items-center justify-between px-3 py-1 text-[7px] text-muted/60">
+                  <span>9:41</span>
+                  <span>●●●● WiFi 🔋</span>
+                </div>
+                <!-- Tab bar -->
+                <div class="flex border-b border-border/50 text-[9px]">
+                  <div class="flex items-center gap-1 px-3 py-2 border-r border-border/50 bg-surface/50">
+                    <span>🟣</span><span class="text-white font-medium">claude</span>
+                  </div>
+                  <div class="flex items-center gap-1 px-3 py-2 text-muted">
+                    <span>🟢</span><span>codex</span>
+                  </div>
+                </div>
+                <!-- Terminal content (scrolling) -->
+                <div class="flex-1 overflow-hidden">
+                  <div class="phone-scroll p-3 font-mono text-[8px] leading-[15px] text-white/80">
+                    <p><span class="text-purple-400">claude</span> <span class="text-muted">›</span> Refactoring auth...</p>
+                    <p class="text-muted">● Reading auth.ts</p>
+                    <p class="text-muted">● Reading jwt.ts</p>
+                    <p><span class="text-accent">✓</span> auth.ts <span class="text-accent">+12</span></p>
+                    <p><span class="text-accent">✓</span> jwt.ts <span class="text-accent">+5</span></p>
+                    <p class="text-yellow-300">? Run tests? (y/n) █</p>
+                    <p class="mt-3 text-muted">--- switch tab ---</p>
+                    <p class="mt-1"><span class="text-green-400">codex</span> <span class="text-muted">›</span> Writing tests...</p>
+                    <p class="text-muted">● Creating auth.test.ts</p>
+                    <p><span class="text-accent">✓</span> 5 tests passed</p>
+                    <p class="mt-3 text-muted">--- back to claude ---</p>
+                    <p class="mt-1"><span class="text-purple-400">claude</span> <span class="text-muted">›</span> Tests passed.</p>
+                    <p><span class="text-accent">✓</span> Committed changes</p>
+                    <p class="text-muted mt-1">❯ _</p>
+                  </div>
+                </div>
+                <!-- Bottom bar -->
+                <div class="flex items-center justify-between px-3 py-1.5 border-t border-border/50 bg-surface/30">
+                  <span class="text-[8px] text-accent">🔗 connected</span>
+                  <span class="text-[8px] text-muted">2 sessions</span>
+                </div>
+              </div>
+              <!-- Home indicator -->
+              <div class="w-12 h-1 bg-[#2a3832] rounded-full mx-auto mt-1.5"></div>
+            </div>
+            <p class="text-[10px] text-muted mt-2 font-mono text-center">📱 Your Phone</p>
+          </div>
+
+        </div>
+
+        <!-- Notification popup -->
+        <div class="absolute top-4 right-4 notification-slide" style="animation-delay: 3s;">
+          <div class="bg-surface border border-border rounded-xl p-3 flex items-center gap-2 shadow-xl max-w-[240px]">
+            <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+              <svg width="14" height="14" class="text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+            </div>
+            <div>
+              <p class="text-[10px] font-medium">Claude needs input</p>
+              <p class="text-[9px] text-muted">Run tests? (y/n)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#connect"
+           class="bg-cloud text-white px-6 py-3 text-sm font-semibold rounded-lg hover:bg-cloud2 transition-colors">
+          Use Cloud Relay — zero setup →
+        </a>
+        <a href="#quickstart"
+           class="border border-border text-muted px-6 py-3 text-sm font-medium rounded-lg hover:text-white hover:border-accent/50 transition-colors">
+          Self-host with --public
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supported Agents -->
+  <section class="py-12 px-6 border-y border-border/30">
+    <div class="max-w-4xl mx-auto">
+      <p class="text-center text-sm text-muted mb-6">Works with any terminal-based coding agent</p>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="feature-card p-4 flex items-center gap-3">
+          <span class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-xl agent-pulse">🟣</span>
+          <div>
+            <p class="text-sm font-medium">Claude Code</p>
+            <p class="text-[11px] text-muted">Anthropic</p>
+          </div>
+        </div>
+        <div class="feature-card p-4 flex items-center gap-3">
+          <span class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-xl agent-pulse" style="animation-delay:0.3s">🟢</span>
+          <div>
+            <p class="text-sm font-medium">Codex</p>
+            <p class="text-[11px] text-muted">OpenAI</p>
+          </div>
+        </div>
+        <div class="feature-card p-4 flex items-center gap-3">
+          <span class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-xl agent-pulse" style="animation-delay:0.6s">🔵</span>
+          <div>
+            <p class="text-sm font-medium">OpenCode</p>
+            <p class="text-[11px] text-muted">Coming soon</p>
+          </div>
+        </div>
+        <div class="feature-card p-4 flex items-center gap-3 border-dashed">
+          <span class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-xl">⚡</span>
+          <div>
+            <p class="text-sm font-medium">Any PTY Agent</p>
+            <p class="text-[11px] text-muted">If it runs in a terminal</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONNECTION MODES (Cloud first) ===== -->
+  <section id="connect" class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">Three ways to connect</h2>
+        <p class="text-muted text-lg">Pick what fits. Upgrade anytime.</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+
+        <!-- Cloud (recommended) -->
+        <div class="feature-card p-6 border-cloud/40 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-cloud text-white text-[10px] font-semibold px-3 py-1 rounded-bl-lg">RECOMMENDED</div>
+          <div class="flex items-center gap-3 mb-4 mt-2">
+            <div class="w-10 h-10 rounded-lg bg-cloud/10 flex items-center justify-center">
+              <svg width="20" height="20" class="text-cloud" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold">Cloud Relay</h3>
+              <span class="text-cloud text-xs font-medium">Zero setup · Scan once</span>
+            </div>
+          </div>
+          <ul class="space-y-2.5 text-muted text-sm mb-6">
+            <li class="flex items-start gap-2"><span class="text-cloud mt-0.5">✓</span> No tunnel to install</li>
+            <li class="flex items-start gap-2"><span class="text-cloud mt-0.5">✓</span> Scan QR once, connect forever</li>
+            <li class="flex items-start gap-2"><span class="text-cloud mt-0.5">✓</span> Works across any network</li>
+            <li class="flex items-start gap-2"><span class="text-cloud mt-0.5">✓</span> Cross-device session sync</li>
+            <li class="flex items-start gap-2"><span class="text-cloud mt-0.5">✓</span> Cloud session history</li>
+          </ul>
+          <div class="code-block px-3 py-2 text-xs font-mono text-center text-muted mb-3">
+            any-coding
+          </div>
+          <p class="text-center text-[11px] text-muted">Just run it — cloud relay handles the rest</p>
+        </div>
+
+        <!-- Cloudflared (self-hosted) -->
+        <div class="feature-card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+              <svg width="20" height="20" class="text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold">Public Tunnel</h3>
+              <span class="text-accent text-xs font-medium">Self-hosted · Free</span>
+            </div>
+          </div>
+          <ul class="space-y-2.5 text-muted text-sm mb-6">
+            <li class="flex items-start gap-2"><span class="text-accent mt-0.5">✓</span> Cloudflare quick tunnel</li>
+            <li class="flex items-start gap-2"><span class="text-accent mt-0.5">✓</span> No account needed</li>
+            <li class="flex items-start gap-2"><span class="text-accent mt-0.5">✓</span> Zero third-party sees code</li>
+            <li class="flex items-start gap-2"><span class="text-accent mt-0.5">✓</span> Works from anywhere</li>
+            <li class="flex items-start gap-2"><span class="text-muted mt-0.5">–</span> <span class="text-muted">URL changes on restart</span></li>
+          </ul>
+          <div class="code-block px-3 py-2 text-xs font-mono text-center text-muted mb-3">
+            any-coding hub --public
+          </div>
+          <p class="text-center text-[11px] text-muted">Requires <code class="text-accent/70">cloudflared</code> installed</p>
+        </div>
+
+        <!-- LAN -->
+        <div class="feature-card p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+              <svg width="20" height="20" class="text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold">LAN Only</h3>
+              <span class="text-muted text-xs">Same Wi-Fi · Simplest</span>
+            </div>
+          </div>
+          <ul class="space-y-2.5 text-muted text-sm mb-6">
+            <li class="flex items-start gap-2"><span class="text-white/40 mt-0.5">✓</span> Zero external dependency</li>
+            <li class="flex items-start gap-2"><span class="text-white/40 mt-0.5">✓</span> Lowest latency</li>
+            <li class="flex items-start gap-2"><span class="text-white/40 mt-0.5">✓</span> Air-gapped friendly</li>
+            <li class="flex items-start gap-2"><span class="text-muted mt-0.5">–</span> <span class="text-muted">Same network only</span></li>
+            <li class="flex items-start gap-2"><span class="text-muted mt-0.5">–</span> <span class="text-muted">Manual IP entry</span></li>
+          </ul>
+          <div class="code-block px-3 py-2 text-xs font-mono text-center text-muted mb-3">
+            any-coding hub --public --tunnel=none
+          </div>
+          <p class="text-center text-[11px] text-muted">Phone & laptop on same Wi-Fi</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section id="features" class="py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Feature 1: Real Terminal -->
+      <div class="grid md:grid-cols-2 gap-12 items-center mb-24 reveal">
+        <div>
+          <span class="badge mb-4 inline-block">Native Terminal</span>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            Real PTY terminal,<br/>not a chat window
+          </h2>
+          <p class="text-muted text-lg leading-relaxed mb-4">
+            AnyCode renders the actual terminal stream on your phone — ANSI colors,
+            progress bars, interactive prompts, even vim. What you see on your laptop
+            is exactly what you see on your phone.
+          </p>
+          <p class="text-sm text-muted">
+            Unlike chat-style UIs that strip formatting and lose context,
+            AnyCode gives you the real thing.
+          </p>
+        </div>
+        <div class="terminal-window glow">
+          <div class="flex items-center gap-2 px-4 py-2.5 border-b border-border/50">
+            <div class="terminal-dots flex gap-1.5">
+              <span class="bg-[#ff5f57] !w-[10px] !h-[10px]"></span>
+              <span class="bg-[#febc2e] !w-[10px] !h-[10px]"></span>
+              <span class="bg-[#28c840] !w-[10px] !h-[10px]"></span>
+            </div>
+            <span class="text-[10px] text-muted ml-2 font-mono">📱 Phone — same output as laptop</span>
+          </div>
+          <div class="p-5 font-mono text-sm leading-relaxed">
+            <p><span class="text-purple-400">claude</span> <span class="text-muted">›</span> Fix the auth middleware</p>
+            <p class="mt-2 text-muted">● Reading src/middleware/auth.ts</p>
+            <p class="text-muted">● Reading src/lib/jwt.ts</p>
+            <p class="mt-2"><span class="text-accent">✓</span> Updated auth.ts <span class="text-accent">+12</span> <span class="text-red-400">-3</span></p>
+            <p><span class="text-accent">✓</span> Updated jwt.ts <span class="text-accent">+5</span> <span class="text-red-400">-1</span></p>
+            <p class="mt-2"><span class="text-blue-400">ℹ</span> <span class="text-muted">Running: </span><span class="text-white">npm test</span></p>
+            <p class="mt-1 text-accent">████████████████████░░░░ 80% <span class="text-muted">tests passing</span></p>
+            <p class="mt-2 text-yellow-300">? Commit changes? <span class="text-muted">(y/n)</span> <span class="animate-pulse">█</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 2: Camera -->
+      <div class="grid md:grid-cols-2 gap-12 items-center mb-24 reveal">
+        <div class="order-2 md:order-1">
+          <div class="feature-card p-8 glow">
+            <div class="space-y-4">
+              <div class="bg-surface rounded-lg p-4 border border-border/50">
+                <div class="flex items-center gap-2 mb-3">
+                  <div class="w-6 h-6 rounded bg-accent/20 flex items-center justify-center text-xs">📷</div>
+                  <span class="text-sm text-muted">whiteboard-arch.jpg</span>
+                  <span class="text-xs text-accent ml-auto">sent to claude</span>
+                </div>
+                <div class="w-full h-20 bg-surface2 rounded flex items-center justify-center text-muted text-xs border border-border/30">
+                  <span>[ architecture diagram ]</span>
+                </div>
+              </div>
+              <div class="bg-surface rounded-lg p-4 border border-border/50">
+                <p class="text-sm"><span class="text-purple-400">claude</span> <span class="text-muted">›</span> I see the diagram. Restructuring API routes to match...</p>
+                <p class="text-[11px] text-muted mt-2">● Updating src/routes/ based on diagram</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="order-1 md:order-2">
+          <span class="badge mb-4 inline-block">Mobile-native</span>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            Snap a photo,<br/>feed it to the agent
+          </h2>
+          <p class="text-muted text-lg leading-relaxed">
+            Whiteboard sketches, error screenshots, architecture diagrams —
+            send from your camera directly as agent context.
+            Something SSH + tmux will never do.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 3: Notifications -->
+      <div class="grid md:grid-cols-2 gap-12 items-center mb-24 reveal">
+        <div>
+          <span class="badge mb-4 inline-block">Smart Notifications</span>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            Know when the<br/>agent needs you
+          </h2>
+          <p class="text-muted text-lg leading-relaxed">
+            Start a task, put your phone down. Get a push notification
+            when the agent hits a prompt — not just when it finishes.
+            Never miss a <code class="text-accent">(y/n)</code> again.
+          </p>
+        </div>
+        <div class="feature-card p-8">
+          <div class="space-y-3">
+            <div class="bg-surface rounded-xl p-4 border border-border/50 flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium">Claude is waiting for input</p>
+                <p class="text-xs text-muted mt-0.5">web-app — "Run tests? (y/n)"</p>
+              </div>
+              <span class="pulse-dot w-2 h-2 rounded-full bg-accent shrink-0 mt-2"></span>
+            </div>
+            <div class="bg-surface rounded-xl p-4 border border-border/50 flex items-start gap-3 opacity-60">
+              <div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium">Codex task completed</p>
+                <p class="text-xs text-muted mt-0.5">payments — 5 tests passed</p>
+              </div>
+            </div>
+            <div class="bg-surface rounded-xl p-4 border border-border/50 flex items-start gap-3 opacity-40">
+              <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium">Build failed</p>
+                <p class="text-xs text-muted mt-0.5">infra — exit code 1</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 4: Multi-agent -->
+      <div class="grid md:grid-cols-2 gap-12 items-center reveal">
+        <div class="order-2 md:order-1">
+          <div class="terminal-window glow">
+            <div class="flex items-center border-b border-border/50">
+              <div class="flex items-center gap-2 px-4 py-2.5 border-r border-border/50 bg-surface/50">
+                <span class="text-sm">🟣</span><span class="text-sm font-medium">claude</span>
+                <span class="text-[10px] text-muted">web-app</span>
+              </div>
+              <div class="flex items-center gap-2 px-4 py-2.5 border-r border-border/50 text-muted">
+                <span class="text-sm">🟢</span><span class="text-sm">codex</span>
+                <span class="text-[10px]">tests</span>
+              </div>
+              <div class="ml-auto px-4">
+                <span class="text-[10px] text-muted font-mono">2 agents</span>
+              </div>
+            </div>
+            <div class="p-5 font-mono text-sm leading-relaxed">
+              <p><span class="text-purple-400">claude</span> <span class="text-muted">›</span> Payment webhook handler done.</p>
+              <p><span class="text-accent">✓</span> Created stripe.ts <span class="text-accent">+48</span></p>
+              <p class="mt-3"><span class="text-green-400">codex</span> <span class="text-muted">›</span> <span class="text-white/60">(background)</span> Writing tests...</p>
+              <p class="text-muted text-xs mt-1">● stripe.test.ts — 3/5 assertions</p>
+              <p class="mt-3"><span class="text-purple-400">claude</span> <span class="text-muted">›</span> Ready for next task.</p>
+              <p class="text-muted text-xs mt-1">❯ <span class="animate-pulse">_</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="order-1 md:order-2">
+          <span class="badge mb-4 inline-block">Multi-agent</span>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            Multiple agents,<br/>one screen
+          </h2>
+          <p class="text-muted text-lg leading-relaxed">
+            Run Claude and Codex side by side. Each gets its own tab with a distinct icon.
+            Claude writes code, Codex writes tests — monitor both from your phone.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section id="quickstart" class="py-20 px-6 border-t border-border/30">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">Up and running in 60 seconds</h2>
+      </div>
+
+      <!-- Cloud path (primary) -->
+      <div class="mb-8">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-6 h-6 rounded bg-cloud/20 flex items-center justify-center">
+            <svg width="14" height="14" class="text-cloud" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+          </div>
+          <span class="text-sm font-medium text-cloud">Cloud Relay (Recommended)</span>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="feature-card p-5 text-center">
+            <div class="w-10 h-10 rounded-xl bg-cloud/10 flex items-center justify-center mx-auto mb-3">
+              <span class="text-cloud text-lg font-bold font-mono">1</span>
+            </div>
+            <h3 class="font-semibold text-sm mb-2">Install</h3>
+            <div class="code-block px-3 py-2 text-[11px] font-mono text-muted">npm i -g any-coding</div>
+          </div>
+          <div class="feature-card p-5 text-center">
+            <div class="w-10 h-10 rounded-xl bg-cloud/10 flex items-center justify-center mx-auto mb-3">
+              <span class="text-cloud text-lg font-bold font-mono">2</span>
+            </div>
+            <h3 class="font-semibold text-sm mb-2">Run</h3>
+            <div class="code-block px-3 py-2 text-[11px] font-mono text-muted">any-coding</div>
+          </div>
+          <div class="feature-card p-5 text-center">
+            <div class="w-10 h-10 rounded-xl bg-cloud/10 flex items-center justify-center mx-auto mb-3">
+              <span class="text-cloud text-lg font-bold font-mono">3</span>
+            </div>
+            <h3 class="font-semibold text-sm mb-2">Scan QR</h3>
+            <p class="text-[11px] text-muted">Open app → scan → done</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Self-hosted path -->
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-6 h-6 rounded bg-accent/20 flex items-center justify-center">
+            <svg width="14" height="14" class="text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <span class="text-sm font-medium text-accent">Self-hosted (Free)</span>
+        </div>
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="feature-card p-4 text-center">
+            <span class="text-accent font-bold font-mono">1</span>
+            <div class="code-block px-2 py-1.5 text-[10px] font-mono text-muted mt-2">npm i -g any-coding</div>
+          </div>
+          <div class="feature-card p-4 text-center">
+            <span class="text-accent font-bold font-mono">2</span>
+            <div class="code-block px-2 py-1.5 text-[10px] font-mono text-muted mt-2">brew install cloudflared</div>
+          </div>
+          <div class="feature-card p-4 text-center">
+            <span class="text-accent font-bold font-mono">3</span>
+            <div class="code-block px-2 py-1.5 text-[10px] font-mono text-muted mt-2">any-coding hub --public</div>
+          </div>
+          <div class="feature-card p-4 text-center">
+            <span class="text-accent font-bold font-mono">4</span>
+            <p class="text-[11px] text-muted mt-2">Scan QR → done</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-20 px-6 border-t border-border/30">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-12 text-center">FAQ</h2>
+      <div class="space-y-4">
+        <details class="feature-card p-5 group" open>
+          <summary class="cursor-pointer flex items-center justify-between font-medium text-sm">
+            What agents can I use?
+            <svg class="w-5 h-5 text-muted group-open:rotate-45 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">
+            Claude Code, OpenAI Codex, and any terminal-based agent that runs in a PTY.
+            AnyCode doesn't parse agent output — it renders the raw terminal stream.
+            If it runs in your terminal, it works on your phone.
+          </p>
+        </details>
+        <details class="feature-card p-5 group">
+          <summary class="cursor-pointer flex items-center justify-between font-medium text-sm">
+            Cloud vs self-hosted — which should I pick?
+            <svg class="w-5 h-5 text-muted group-open:rotate-45 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">
+            <strong class="text-white">Cloud relay</strong> is the easiest — scan once and it just works, anywhere, forever.
+            <strong class="text-white">Self-hosted</strong> (cloudflared) is free but the URL changes every restart, so you re-scan.
+            <strong class="text-white">LAN</strong> is simplest but phone and laptop must be on the same Wi-Fi.
+            Start with cloud, switch to self-hosted if you want full control.
+          </p>
+        </details>
+        <details class="feature-card p-5 group">
+          <summary class="cursor-pointer flex items-center justify-between font-medium text-sm">
+            Is my code safe?
+            <svg class="w-5 h-5 text-muted group-open:rotate-45 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">
+            In self-hosted mode, your phone connects directly to your machine — no server in between.
+            Cloud relay bridges bytes without persisting PTY content. Both use WSS encryption.
+            Self-hosted is always available for maximum privacy.
+          </p>
+        </details>
+        <details class="feature-card p-5 group">
+          <summary class="cursor-pointer flex items-center justify-between font-medium text-sm">
+            Why a real terminal instead of a chat UI?
+            <svg class="w-5 h-5 text-muted group-open:rotate-45 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">
+            Chat UIs restructure agent output — you lose ANSI formatting, progress bars,
+            interactive prompts, and the ability to run vim or htop.
+            AnyCode renders the real PTY stream so what you see on your phone
+            is exactly what's on your laptop. No information lost.
+          </p>
+        </details>
+        <details class="feature-card p-5 group">
+          <summary class="cursor-pointer flex items-center justify-between font-medium text-sm">
+            Does it work on iOS?
+            <svg class="w-5 h-5 text-muted group-open:rotate-45 transition-transform shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </summary>
+          <p class="mt-3 text-muted text-sm leading-relaxed">
+            Android first. iOS is on the roadmap — follow the GitHub repo for updates.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 px-6 border-t border-border/30">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">Start building from anywhere</h2>
+      <p class="text-muted text-lg mb-8">One install. One scan. Every coding agent on your phone.</p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#connect"
+           class="bg-cloud text-white px-6 py-3 text-sm font-semibold rounded-lg hover:bg-cloud2 transition-colors">
+          Use Cloud Relay →
+        </a>
+        <a href="https://github.com/gurudin/anycoding" target="_blank"
+           class="border border-border text-muted px-6 py-3 text-sm font-medium rounded-lg hover:text-white hover:border-accent/50 transition-colors">
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-border/50 py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <h4 class="text-sm font-semibold mb-4">Product</h4>
+          <ul class="space-y-2 text-sm text-muted">
+            <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+            <li><a href="#connect" class="hover:text-white transition-colors">Connection Modes</a></li>
+            <li><a href="#quickstart" class="hover:text-white transition-colors">Quick Start</a></li>
+            <li><a href="#faq" class="hover:text-white transition-colors">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold mb-4">Agents</h4>
+          <ul class="space-y-2 text-sm text-muted">
+            <li><a href="https://docs.anthropic.com/en/docs/claude-code" target="_blank" class="hover:text-white transition-colors">Claude Code</a></li>
+            <li><a href="https://openai.com/index/introducing-codex/" target="_blank" class="hover:text-white transition-colors">Codex</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold mb-4">Community</h4>
+          <ul class="space-y-2 text-sm text-muted">
+            <li><a href="https://github.com/gurudin/anycoding" target="_blank" class="hover:text-white transition-colors">GitHub</a></li>
+            <li><a href="https://github.com/gurudin/anycoding/issues" target="_blank" class="hover:text-white transition-colors">Issues</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold mb-4">Download</h4>
+          <ul class="space-y-2 text-sm text-muted">
+            <li><a href="https://github.com/gurudin/anycoding/releases" target="_blank" class="hover:text-white transition-colors">Android APK</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Google Play (soon)</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">iOS (roadmap)</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-border/50 text-sm text-muted">
+        <p>MIT License &middot; Built by <a href="https://gurudin.github.io" class="hover:text-white transition-colors">Gurudin</a></p>
+        <p class="mt-2 sm:mt-0">AnyCode — every coding agent, from your phone.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll reveal -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" />
+
+  <!-- noscript fallback -->
+  <noscript>
+    <style>.reveal { opacity: 1; transform: none; } .phone-scroll { animation: none; }</style>
+  </noscript>
+
+</body>
+</html>
